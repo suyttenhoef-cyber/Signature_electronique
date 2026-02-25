@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Signature Électronique – Administrations Belges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,800;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1f3c;
+    --navy-light: #152c52;
+    --blue: #1a56db;
+    --blue-light: #3b7af9;
+    --gold: #e8a020;
+    --gold-light: #f5c45a;
+    --cream: #f7f4ef;
+    --cream-dark: #ede8df;
+    --text: #1a1a2e;
+    --text-muted: #5a637a;
+    --white: #ffffff;
+    --red: #dc2626;
+    --orange: #ea580c;
+    --green: #16a34a;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(13,31,60,0.12);
+    --shadow-lg: 0 12px 48px rgba(13,31,60,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background ── */
+  .bg-pattern {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(26,86,219,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 80% 80%, rgba(232,160,32,0.12) 0%, transparent 60%),
+      var(--navy);
+  }
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* ── Layout ── */
+  .app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 16px 60px; }
+
+  /* ── Top Bar ── */
+  .topbar {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 0 32px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue), var(--gold));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 800; color: white; font-size: 18px;
+  }
+  .logo-text { font-family: 'Fraunces', serif; font-weight: 600; color: white; font-size: 16px; letter-spacing: -0.3px; }
+  .logo-text span { color: var(--gold-light); }
+  .badge-secure {
+    font-size: 11px; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%; max-width: 860px;
+    background: var(--cream);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Progress Bar ── */
+  .progress-bar-wrap {
+    height: 5px; background: var(--cream-dark); position: relative;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--blue), var(--gold));
+    transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* ── Module Label ── */
+  .module-label {
+    display: flex; align-items: center; gap: 10px;
+    padding: 20px 36px 0;
+    font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .module-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--gold));
+  }
+
+  /* ── Question Body ── */
+  .q-body { padding: 24px 36px 36px; }
+  .q-number { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; }
+  .q-title {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px;
+    line-height: 1.4; color: var(--navy); margin-bottom: 8px;
+  }
+  .q-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+
+  /* ── Scenario Box ── */
+  .scenario-box {
+    background: var(--navy); color: white; border-radius: 12px;
+    padding: 20px 24px; margin-bottom: 24px; position: relative; overflow: hidden;
+  }
+  .scenario-box::before {
+    content: '"'; font-family: 'Fraunces', serif; font-size: 80px; color: var(--gold-light);
+    opacity: 0.2; position: absolute; top: -10px; left: 16px; line-height: 1;
+  }
+  .scenario-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold-light); margin-bottom: 8px; font-weight: 600; }
+  .scenario-text { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.85); }
+
+  /* ── Options ── */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 20px; border-radius: 12px;
+    background: white; border: 2px solid transparent;
+    cursor: pointer; transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(13,31,60,0.06);
+  }
+  .option:hover { border-color: var(--blue-light); transform: translateX(4px); }
+  .option.selected { border-color: var(--blue); background: #eef3ff; }
+  .option.correct { border-color: var(--green); background: #f0fdf4; }
+  .option.risky { border-color: var(--orange); background: #fff7ed; }
+  .option-key {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 8px;
+    background: var(--cream-dark); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .option.selected .option-key { background: var(--blue); color: white; }
+  .option-content { flex: 1; }
+  .option-text { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .option-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── Multi-select ── */
+  .multi-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; font-style: italic; }
+
+  /* ── Info Tip ── */
+  .info-tip {
+    margin-top: 20px; padding: 14px 18px;
+    background: linear-gradient(135deg, rgba(26,86,219,0.08), rgba(232,160,32,0.06));
+    border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0;
+    font-size: 13px; color: var(--text-muted); line-height: 1.6;
+  }
+  .info-tip strong { color: var(--navy); }
+
+  /* ── Navigation ── */
+  .q-nav {
+    padding: 0 36px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .btn {
+    padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s ease; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary {
+    background: var(--navy); color: white;
+    box-shadow: 0 4px 16px rgba(13,31,60,0.2);
+  }
+  .btn-primary:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,31,60,0.3); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: transparent; color: var(--text-muted); }
+  .btn-secondary:hover { color: var(--navy); }
+  .step-counter { font-size: 13px; color: var(--text-muted); }
+
+  /* ── Cover Screen ── */
+  .cover { padding: 48px 36px 40px; }
+  .cover-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;
+    color: var(--blue); margin-bottom: 20px;
+    background: rgba(26,86,219,0.08); padding: 6px 14px; border-radius: 20px;
+  }
+  .cover-title {
+    font-family: 'Fraunces', serif; font-size: 36px; font-weight: 800; color: var(--navy);
+    line-height: 1.2; margin-bottom: 16px;
+  }
+  .cover-title em { font-style: italic; color: var(--blue); }
+  .cover-lead { font-size: 16px; color: var(--text-muted); line-height: 1.7; margin-bottom: 32px; max-width: 580px; }
+  .cover-features { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 36px; }
+  .cover-feat {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text); font-weight: 500;
+    background: white; padding: 8px 16px; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(13,31,60,0.07);
+  }
+  .cover-feat-icon { font-size: 16px; }
+  .version-selector { margin-bottom: 32px; }
+  .version-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .version-cards { display: flex; gap: 12px; flex-wrap: wrap; }
+  .ver-card {
+    flex: 1; min-width: 160px; padding: 16px; border-radius: 12px;
+    background: white; border: 2px solid var(--cream-dark); cursor: pointer;
+    transition: all 0.2s; text-align: center;
+  }
+  .ver-card:hover { border-color: var(--blue-light); }
+  .ver-card.active { border-color: var(--blue); background: #eef3ff; }
+  .ver-icon { font-size: 24px; margin-bottom: 6px; }
+  .ver-name { font-weight: 700; font-size: 14px; color: var(--navy); }
+  .ver-time { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .cover-disclaimer { font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+
+  /* ── Result Screen ── */
+  .result { padding: 40px 36px; }
+  .result-header { text-align: center; margin-bottom: 40px; }
+  .result-level {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    padding: 8px 20px; border-radius: 20px; margin-bottom: 20px;
+  }
+  .level-red { background: #fef2f2; color: var(--red); }
+  .level-orange { background: #fff7ed; color: var(--orange); }
+  .level-green { background: #f0fdf4; color: var(--green); }
+  .result-title { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 800; color: var(--navy); margin-bottom: 12px; line-height: 1.3; }
+  .result-subtitle { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 560px; margin: 0 auto; }
+
+  /* Score Ring */
+  .score-ring-wrap { display: flex; justify-content: center; margin: 32px 0; }
+  .score-ring {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: conic-gradient(var(--score-color, var(--blue)) var(--score-pct, 0deg), var(--cream-dark) 0deg);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .score-ring::after {
+    content: ''; position: absolute; width: 104px; height: 104px;
+    background: var(--cream); border-radius: 50%;
+  }
+  .score-value {
+    position: relative; z-index: 1; text-align: center;
+  }
+  .score-num { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 800; color: var(--navy); line-height: 1; }
+  .score-max { font-size: 12px; color: var(--text-muted); }
+
+  /* Modules Result */
+  .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  @media(max-width:600px){ .modules-grid { grid-template-columns: 1fr; } }
+  .mod-result {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(13,31,60,0.07);
+  }
+  .mod-result-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+  .mod-result-name { font-weight: 700; font-size: 15px; color: var(--navy); margin-bottom: 12px; }
+  .mod-bar { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; }
+  .mod-bar-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.22,1,0.36,1); }
+  .mod-score-text { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  /* Recommendations */
+  .reco-section { margin: 32px 0; }
+  .reco-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--navy); margin-bottom: 20px; }
+  .reco-list { display: flex; flex-direction: column; gap: 12px; }
+  .reco-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: white; border-radius: 12px; padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(13,31,60,0.06);
+  }
+  .reco-icon { font-size: 20px; min-width: 24px; margin-top: 1px; }
+  .reco-content {}
+  .reco-text { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 500; }
+  .reco-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+
+  /* CTA */
+  .cta-block {
+    background: var(--navy); border-radius: 16px; padding: 32px;
+    margin: 32px 0; color: white; position: relative; overflow: hidden;
+  }
+  .cta-block::after {
+    content: ''; position: absolute; right: -30px; top: -30px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,160,32,0.15), transparent);
+  }
+  .cta-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold-light); margin-bottom: 12px; font-weight: 600; }
+  .cta-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; margin-bottom: 12px; line-height: 1.3; }
+  .cta-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 24px; max-width: 480px; }
+  .cta-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .cta-feat { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85); }
+  .cta-feat-check { color: var(--gold-light); font-weight: 700; }
+  .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--navy);
+    font-weight: 700; padding: 12px 24px; border-radius: 10px; font-size: 14px;
+    cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s; text-decoration: none; display: inline-block;
+  }
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,160,32,0.3); }
+  .btn-outline-white {
+    background: transparent; color: white; border: 1.5px solid rgba(255,255,255,0.3);
+    padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s; text-decoration: none; display: inline-block;
+  }
+  .btn-outline-white:hover { border-color: white; background: rgba(255,255,255,0.05); }
+  .result-restart { text-align: center; margin-top: 24px; }
+  .btn-text { background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; text-decoration: underline; font-family: 'DM Sans', sans-serif; }
+
+  /* ── Legal strip ── */
+  .legal-strip {
+    margin-top: 40px; font-size: 11px; color: rgba(255,255,255,0.3);
+    text-align: center; line-height: 1.8;
+  }
+  .legal-strip a { color: rgba(255,255,255,0.4); }
+
+  /* ── Responsive ── */
+  @media(max-width: 640px){
+    .cover { padding: 32px 20px 28px; }
+    .q-body { padding: 20px 20px 28px; }
+    .q-nav { padding: 0 20px 24px; }
+    .module-label { padding: 16px 20px 0; }
+    .cover-title { font-size: 26px; }
+    .q-title { font-size: 18px; }
+    .result { padding: 28px 20px; }
+    .cta-block { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-grid"></div>
+
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">e∫</div>
+      <div class="logo-text">e<span>Sign</span>Flow <span style="color:rgba(255,255,255,0.4);font-family:'DM Sans';font-weight:300">| Diagnostic</span></div>
+    </div>
+    <div class="badge-secure">🔒 Données non stockées</div>
+  </div>
+
+  <div class="card" id="mainCard"></div>
+
+  <div class="legal-strip">
+    Outil pédagogique non contractuel · Conforme eIDAS &amp; RGPD · <a href="https://www.esignflow.be/fr-be/faq" target="_blank">esignflow.be</a>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const VERSIONS = {
+  standard: { name: 'Standard', icon: '📋', time: '8–10 min', description: 'Complet & équilibré', qIds: ['A1','A2','A3','B1','B2','B3','C1','C2','D1','D2'] },
+  court: { name: 'Rapide', icon: '⚡', time: '5 min', description: 'Essentiel', qIds: ['A1','A3','B2','C1','D1'] },
+  premium: { name: 'Premium', icon: '🏛️', time: '15–20 min', description: 'Scénarios immersifs', qIds: ['A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','D1','D2','D3'] }
+};
+
+const MODULES = {
+  A: { label: 'Module A', name: 'Conformité légale & eIDAS', color: '#1a56db' },
+  B: { label: 'Module B', name: 'Processus internes & validation', color: '#7c3aed' },
+  C: { label: 'Module C', name: 'Sécurité & gestion du risque', color: '#dc2626' },
+  D: { label: 'Module D', name: 'Maturité numérique', color: '#16a34a' },
+};
+
+const QUESTIONS = {
+  A1: {
+    mod: 'A', number: 'A–01',
+    title: 'Quelle valeur juridique attribuez-vous aux documents signés électroniquement dans votre administration ?',
+    subtitle: 'Cette question évalue votre compréhension du cadre réglementaire eIDAS et de ses implications pratiques.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Nous n\'utilisons pas la signature électronique, car sa valeur juridique nous semble incertaine.', sub:'Les documents sont tous signés manuscritement.', score:0, risk:true },
+      { key:'b', text:'Nous l\'utilisons, mais sans distinguer les niveaux de signature (simple, avancée, qualifiée).', sub:'Une signature est une signature pour nous.', score:1 },
+      { key:'c', text:'Nous distinguons les niveaux mais ne savons pas toujours lequel appliquer selon le document.', sub:'Nous manquons de doctrine interne claire.', score:2 },
+      { key:'d', text:'Nous appliquons rigoureusement les niveaux eIDAS selon la nature juridique et l\'enjeu de chaque document.', sub:'Notre doctrine est formalisée et connue de tous.', score:3, correct:true },
+    ],
+    tip: '<strong>Le règlement eIDAS (n°910/2014)</strong> définit 3 niveaux de signature : simple, avancée et qualifiée. La signature qualifiée a la même valeur juridique qu\'une signature manuscrite dans toute l\'UE. En Belgique, la circulaire 2022/C/34 précise les règles pour les actes administratifs.',
+    maxScore: 3,
+  },
+  A2: {
+    mod: 'A', number: 'A–02',
+    title: 'Laquelle de ces affirmations concernant la signature qualifiée (SQE) est correcte ?',
+    subtitle: 'Testez vos connaissances sur le niveau de signature le plus sécurisé reconnu en droit européen.',
+    type: 'single',
+    options: [
+      { key:'a', text:'La signature qualifiée n\'est pas reconnue en Belgique et n\'a pas de valeur juridique.', score:0, risk:true },
+      { key:'b', text:'Elle nécessite un certificat qualifié délivré par un prestataire de confiance accrédité (TSP).', score:3, correct:true },
+      { key:'c', text:'N\'importe quel outil peut créer une signature qualifiée du moment qu\'elle est sécurisée.', score:0, risk:true },
+      { key:'d', text:'La SQE et la signature manuscrite n\'ont pas la même valeur pour les actes notariés.', score:1 },
+    ],
+    tip: '<strong>La signature qualifiée</strong> exige un certificat qualifié émis par un Trust Service Provider (TSP) figurant sur la liste de confiance belge (eIDAS Trusted List). itsme®, la carte d\'identité électronique (eID) et la clé étrangère permettent d\'obtenir ce niveau en Belgique.',
+    maxScore: 3,
+  },
+  A3: {
+    mod: 'A', number: 'A–03',
+    title: 'Quels documents de votre administration nécessitent, selon vous, une signature qualifiée ?',
+    subtitle: 'Identification des documents à fort enjeu juridique nécessitant le niveau de signature le plus élevé.',
+    type: 'multi',
+    options: [
+      { key:'a', text:'Délibérations du Conseil communal / CPAS', score:1 },
+      { key:'b', text:'Marchés publics et cahiers des charges', score:1 },
+      { key:'c', text:'Bulletins de salaire', score:0 },
+      { key:'d', text:'Contrats de travail et avenants', score:1 },
+      { key:'e', text:'Décisions individuelles à portée juridique (permis, sanctions)', score:1 },
+      { key:'f', text:'Factures internes', score:0 },
+    ],
+    correctKeys: ['a','b','d','e'],
+    tip: '<strong>Règle pratique :</strong> tout document ayant une portée juridique opposable à des tiers, ou qui peut faire l\'objet d\'un recours, exige a minima une signature avancée, souvent qualifiée. Les marchés publics ≥ 30.000€ HTVA sont particulièrement exposés.',
+    maxScore: 4,
+  },
+  A4: {
+    mod: 'A', number: 'A–04',
+    scenario: true,
+    scenarioText: 'Votre commune reçoit un appel d\'offres signé par un fournisseur via un outil gratuit en ligne (type HelloSign free tier). Le document contient une signature visuelle mais sans certificat qualifié. La commande dépasse 85.000€.',
+    title: 'Comment réagissez-vous à cette réception de document ?',
+    subtitle: 'Scénario immersif : marchés publics et validité des signatures reçues.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Nous acceptons : une signature électronique, même simple, engage juridiquement le signataire.', score:0, risk:true },
+      { key:'b', text:'Nous vérifions manuellement l\'identité du signataire puis acceptons si tout semble correct.', score:1 },
+      { key:'c', text:'Nous refusons et demandons une re-signature avec un outil certifié eIDAS de niveau avancé minimum.', score:3, correct:true },
+      { key:'d', text:'Nous imprimons et faisons signer physiquement pour être certains.', score:1 },
+    ],
+    tip: '<strong>Au-dessus de 30.000€ HTVA</strong>, la loi belge sur les marchés publics impose une traçabilité renforcée. Un simple scan ou une signature image sans certificat est contestable devant le Conseil d\'État. Le risque porte sur l\'annulation du marché et la responsabilité personnelle de l\'ordonnateur.',
+    maxScore: 3,
+  },
+  B1: {
+    mod: 'B', number: 'B–01',
+    title: 'Comment les documents importants circulent-ils actuellement dans votre administration ?',
+    subtitle: 'Évaluation de vos workflows documentaires internes et des risques associés.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Entièrement sur papier, avec circulation physique des dossiers entre services.', score:0, risk:true },
+      { key:'b', text:'Par e-mail avec PDF en pièce jointe, puis impression pour signature.', score:1 },
+      { key:'c', text:'Via un outil numérique, mais sans circuit de validation formalisé.', score:2 },
+      { key:'d', text:'Via un workflow numérique avec étapes de validation définies, traçabilité et archivage automatisé.', score:3, correct:true },
+    ],
+    tip: '<strong>Un workflow numérique formalisé</strong> réduit les délais de traitement de 60% en moyenne et élimine le risque de perte de document ou de signature "orpheline". Il garantit aussi la traçabilité exigée par la réglementation archivistique belge (AGR).',
+    maxScore: 3,
+  },
+  B2: {
+    mod: 'B', number: 'B–02',
+    title: 'Qui peut valider et signer officiellement les documents engageant votre administration ?',
+    subtitle: 'Gouvernance des délégations de pouvoir et contrôle des autorisations de signature.',
+    type: 'multi',
+    options: [
+      { key:'a', text:'Le Directeur général / Secrétaire communal', score:1 },
+      { key:'b', text:'Les chefs de service selon délégation formalisée', score:1 },
+      { key:'c', text:'N\'importe quel agent pour accélérer les traitements', score:0, risk:true },
+      { key:'d', text:'Le Collège communal / Bureau permanent', score:1 },
+      { key:'e', text:'Nous n\'avons pas de politique de délégation formalisée', score:0, risk:true },
+    ],
+    correctKeys: ['a','b','d'],
+    tip: '<strong>La délégation de signature</strong> doit être explicitement prévue par le règlement d\'ordre intérieur ou une décision du Conseil. Une signature apposée sans délégation valide engage personnellement l\'agent et expose l\'administration à l\'annulation de l\'acte.',
+    maxScore: 3,
+  },
+  B3: {
+    mod: 'B', number: 'B–03',
+    scenario: true,
+    scenarioText: 'Un agent RH doit faire signer 47 contrats à durée déterminée avant le 1er du mois. Le Directeur est en déplacement. L\'impression, la signature, la numérisation et l\'envoi postal prennent habituellement 3 jours ouvrables.',
+    title: 'Comment votre administration gère-t-elle ce type de situation ?',
+    subtitle: 'Scénario : signature en volume et contraintes temporelles.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Nous attendons le retour du Directeur. Les délais ne peuvent pas être respectés.', score:0, risk:true },
+      { key:'b', text:'Un autre agent signe "par délégation" sans autorisation formelle préalable.', score:0, risk:true },
+      { key:'c', text:'Nous utilisons une solution de signature électronique en masse avec délégation formalisée.', score:3, correct:true },
+      { key:'d', text:'Nous avons une procédure dégradée mais elle crée des risques de conformité.', score:1 },
+    ],
+    tip: '<strong>La signature électronique en masse</strong> permet d\'envoyer, signer et archiver des dizaines de documents en quelques minutes, depuis n\'importe quel appareil. C\'est particulièrement utile pour les RH (contrats saisonniers, agents temporaires, CPAS) et les services financiers.',
+    maxScore: 3,
+  },
+  B4: {
+    mod: 'B', number: 'B–04',
+    title: 'Disposez-vous d\'un registre ou d\'un système de suivi des documents signés ?',
+    subtitle: 'Traçabilité documentaire et conformité aux exigences archivistiques belges.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Non, les documents sont classés manuellement dans des armoires ou sur des drives partagés.', score:0, risk:true },
+      { key:'b', text:'Nous avons un tableau Excel de suivi, mis à jour manuellement.', score:1 },
+      { key:'c', text:'Notre logiciel métier trace les documents mais sans lien avec la signature.', score:2 },
+      { key:'d', text:'Chaque document signé est horodaté, archivé automatiquement avec son journal de preuve.', score:3, correct:true },
+    ],
+    tip: '<strong>L\'horodatage qualifié</strong> est une obligation pour certains actes administratifs. Il prouve qu\'un document existait tel quel à un instant précis, ce qui est crucial en cas de contentieux ou d\'audit de la Cour des comptes.',
+    maxScore: 3,
+  },
+  C1: {
+    mod: 'C', number: 'C–01',
+    title: 'Quels risques associez-vous à l\'usage de la signature électronique dans votre administration ?',
+    subtitle: 'Identification de votre culture du risque documentaire et de vos angles morts.',
+    type: 'multi',
+    options: [
+      { key:'a', text:'Usurpation d\'identité du signataire', score:1 },
+      { key:'b', text:'Modification du document après signature', score:1 },
+      { key:'c', text:'Non-conformité eIDAS → nullité de l\'acte', score:1 },
+      { key:'d', text:'Aucun, la signature électronique est parfaitement sûre sans conditions', score:0, risk:true },
+      { key:'e', text:'Perte de la clé privée ou du certificat', score:1 },
+      { key:'f', text:'Archivage défaillant → impossibilité de prouver la signature', score:1 },
+    ],
+    correctKeys: ['a','b','c','e','f'],
+    tip: '<strong>La signature numérique n\'est pas infaillible</strong> si elle repose sur un outil non certifié, une mauvaise gestion des certificats, ou l\'absence d\'horodatage. La valeur probante dépend de la chaîne de confiance complète, du signataire à l\'archivage.',
+    maxScore: 5,
+  },
+  C2: {
+    mod: 'C', number: 'C–02',
+    scenario: true,
+    scenarioText: 'Un citoyen conteste la légalité d\'une décision administrative (refus de permis d\'urbanisme). L\'acte a été signé électroniquement par un échevin il y a 8 mois. Le greffier doit produire la preuve de signature auprès du Conseil d\'État dans les 15 jours.',
+    title: 'Votre administration peut-elle produire cette preuve rapidement ?',
+    subtitle: 'Test de résilience : traçabilité et production de preuve sous contrainte temporelle.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Non. Nous n\'avons pas conservé de journal de preuve horodaté.', score:0, risk:true },
+      { key:'b', text:'Peut-être. Le document est quelque part mais la preuve de signature est difficile à retrouver.', score:1 },
+      { key:'c', text:'Oui, mais cela nécessite l\'intervention du prestataire informatique externe.', score:2 },
+      { key:'d', text:'Oui. Notre système génère automatiquement un rapport de preuve consultable en temps réel.', score:3, correct:true },
+    ],
+    tip: '<strong>Le rapport d\'audit</strong> (ou "journal de preuve") est un document électronique qui détaille : qui a signé, quand, avec quel certificat, sur quel document (hash). C\'est la pièce maîtresse en cas de contestation. Les plateformes conformes eIDAS le génèrent automatiquement.',
+    maxScore: 3,
+  },
+  C3: {
+    mod: 'C', number: 'C–03',
+    title: 'Comment vos agents sont-ils formés à la sécurité documentaire et à la signature électronique ?',
+    subtitle: 'Évaluation du capital humain en matière de conformité numérique.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Aucune formation spécifique. Ils se débrouillent.', score:0, risk:true },
+      { key:'b', text:'Une note de service interne a été diffusée lors de la mise en place de l\'outil.', score:1 },
+      { key:'c', text:'Des formations e-learning ou présentiel ont été organisées pour les agents concernés.', score:2 },
+      { key:'d', text:'Formation initiale + rappels réguliers + procédures accessibles en ligne pour tous les agents.', score:3, correct:true },
+    ],
+    tip: '<strong>85% des incidents de sécurité documentaire</strong> dans les administrations sont liés à une erreur humaine (mauvais niveau de signature, mauvais destinataire, absence de vérification). La formation est le premier investissement de conformité.',
+    maxScore: 3,
+  },
+  D1: {
+    mod: 'D', number: 'D–01',
+    title: 'Quel est le niveau de numérisation actuel de votre administration ?',
+    subtitle: 'Positionnement sur la courbe de maturité numérique du secteur public belge.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Principalement papier. La numérisation est encore marginale.', score:0, risk:true },
+      { key:'b', text:'Outils bureautiques (Office, e-mail) mais peu d\'outils métiers spécialisés.', score:1 },
+      { key:'c', text:'Logiciels métiers en place mais les workflows sont encore partiellement manuels.', score:2 },
+      { key:'d', text:'Administration largement numérisée, avec intégrations entre outils et automatisations.', score:3, correct:true },
+    ],
+    tip: '<strong>Le Plan d\'action Digitalisation Wallonie 2030</strong> et les obligations liées au DESI (Digital Economy & Society Index) imposent aux administrations belges d\'accélérer leur transformation numérique. La signature électronique est souvent le premier levier actionné.',
+    maxScore: 3,
+  },
+  D2: {
+    mod: 'D', number: 'D–02',
+    title: 'Quels acteurs de votre administration sont impliqués dans la politique de signature électronique ?',
+    subtitle: 'Gouvernance transversale et pilotage de la conformité documentaire.',
+    type: 'multi',
+    options: [
+      { key:'a', text:'Direction générale', score:1 },
+      { key:'b', text:'Service informatique', score:1 },
+      { key:'c', text:'Service juridique / Secrétariat', score:1 },
+      { key:'d', text:'RH', score:1 },
+      { key:'e', text:'Marchés publics', score:1 },
+      { key:'f', text:'Personne ne pilote formellement ce sujet', score:0, risk:true },
+    ],
+    correctKeys: ['a','b','c','d','e'],
+    tip: '<strong>La signature électronique est un sujet transversal</strong> qui concerne autant l\'IT (sécurité, intégration) que le juridique (conformité), les RH (contrats), les marchés publics (offres, actes) et la direction (gouvernance). Un responsable désigné est indispensable.',
+    maxScore: 5,
+  },
+  D3: {
+    mod: 'D', number: 'D–03',
+    scenario: true,
+    scenarioText: 'Votre commune souhaite permettre aux citoyens de signer des documents administratifs en ligne (convention de mise à disposition d\'infrastructure, bail emphytéotique, acte de candidature...) sans devoir se déplacer au guichet.',
+    title: 'Êtes-vous en mesure de proposer cette expérience aujourd\'hui ?',
+    subtitle: 'Scénario : signature citoyenne et transformation du guichet.',
+    type: 'single',
+    options: [
+      { key:'a', text:'Non. Le citoyen doit toujours se déplacer pour signer physiquement.', score:0, risk:true },
+      { key:'b', text:'Partiellement. Certains documents peuvent être envoyés par e-mail, puis renvoyés scannés.', score:1 },
+      { key:'c', text:'Oui pour certains documents via notre portail citoyen, mais sans signature qualifiée.', score:2 },
+      { key:'d', text:'Oui. Les citoyens peuvent signer avec leur eID ou itsme® depuis chez eux, en toute conformité.', score:3, correct:true },
+    ],
+    tip: '<strong>La signature citoyenne à distance</strong> permet de réduire les délais de traitement et d\'améliorer l\'accessibilité du service public, notamment pour les personnes à mobilité réduite. L\'intégration avec itsme® (100% belge, 7M d\'utilisateurs) est la solution la plus adoptée.',
+    maxScore: 3,
+  },
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let state = {
+  screen: 'cover',
+  version: 'standard',
+  currentQIdx: 0,
+  answers: {}, // qId -> [keys]
+};
+
+function getQList() { return VERSIONS[state.version].qIds; }
+function totalQ() { return getQList().length; }
+function currentQId() { return getQList()[state.currentQIdx]; }
+
+// ══════════════════════════════════════════════════
+// SCORING
+// ══════════════════════════════════════════════════
+function computeScore() {
+  let total = 0, maxTotal = 0;
+  const modScores = { A:{s:0,m:0}, B:{s:0,m:0}, C:{s:0,m:0}, D:{s:0,m:0} };
+
+  getQList().forEach(qId => {
+    const q = QUESTIONS[qId];
+    const answered = state.answers[qId] || [];
+    let qScore = 0;
+    if (q.type === 'single') {
+      const ans = answered[0];
+      const opt = q.options.find(o=>o.key===ans);
+      qScore = opt ? opt.score : 0;
+    } else {
+      answered.forEach(k => {
+        const opt = q.options.find(o=>o.key===k);
+        if(opt) qScore += opt.score;
+        // penalty for risky
+        if(opt && opt.risk) qScore -= 1;
+      });
+      qScore = Math.max(0, qScore);
+    }
+    total += qScore;
+    maxTotal += q.maxScore;
+    modScores[q.mod].s += qScore;
+    modScores[q.mod].m += q.maxScore;
+  });
+
+  const pct = maxTotal > 0 ? Math.round((total/maxTotal)*100) : 0;
+  return { total, maxTotal, pct, modScores };
+}
+
+function getLevel(pct) {
+  if(pct < 40) return 'red';
+  if(pct < 70) return 'orange';
+  return 'green';
+}
+
+// ══════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════
+const card = document.getElementById('mainCard');
+
+function render() {
+  if(state.screen==='cover') renderCover();
+  else if(state.screen==='question') renderQuestion();
+  else if(state.screen==='result') renderResult();
+}
+
+function renderCover() {
+  const v = VERSIONS[state.version];
+  card.innerHTML = `
+    <div class="cover">
+      <div class="cover-eyebrow">⚡ Outil de diagnostic officiel</div>
+      <h1 class="cover-title">Votre administration est-elle<br><em>prête pour la signature</em><br>électronique ?</h1>
+      <p class="cover-lead">Les administrations belges font face à des obligations croissantes en matière de conformité numérique. Ce diagnostic vous permet d'évaluer votre niveau de maturité, d'identifier vos risques et d'obtenir des recommandations concrètes et actionnables.</p>
+      <div class="cover-features">
+        <div class="cover-feat"><span class="cover-feat-icon">⚖️</span> Cadre eIDAS & droit belge</div>
+        <div class="cover-feat"><span class="cover-feat-icon">🔒</span> Sécurité documentaire</div>
+        <div class="cover-feat"><span class="cover-feat-icon">📊</span> Diagnostic personnalisé</div>
+        <div class="cover-feat"><span class="cover-feat-icon">✅</span> Recommandations pratiques</div>
+      </div>
+      <div class="version-selector">
+        <div class="version-title">Choisissez votre format</div>
+        <div class="version-cards">
+          ${Object.entries(VERSIONS).map(([k,v])=>`
+            <div class="ver-card ${state.version===k?'active':''}" onclick="selectVersion('${k}')">
+              <div class="ver-icon">${v.icon}</div>
+              <div class="ver-name">${v.name}</div>
+              <div class="ver-time">${v.time}</div>
+              <div class="ver-time" style="margin-top:4px;font-size:11px;">${v.description}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <button class="btn btn-primary" style="font-size:15px;padding:14px 36px;" onclick="startQuiz()">
+        Démarrer le diagnostic →
+      </button>
+      <p class="cover-disclaimer">Aucune donnée personnelle n'est collectée. Les réponses restent dans votre navigateur.</p>
+    </div>
+  `;
+}
+
+function selectVersion(v) {
+  state.version = v;
+  state.answers = {};
+  renderCover();
+}
+
+function startQuiz() {
+  state.screen = 'question';
+  state.currentQIdx = 0;
+  render();
+}
+
+function renderQuestion() {
+  const qId = currentQId();
+  const q = QUESTIONS[qId];
+  const qList = getQList();
+  const pct = Math.round(((state.currentQIdx)/(totalQ()))*100);
+  const answered = state.answers[qId] || [];
+  const mod = MODULES[q.mod];
+  const canNext = answered.length > 0;
+
+  card.innerHTML = `
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="module-label">
+      <div class="module-dot" style="background:${mod.color}"></div>
+      ${mod.label} — ${mod.name}
+    </div>
+    <div class="q-body">
+      <div class="q-number">Question ${state.currentQIdx+1} / ${totalQ()}</div>
+      ${q.scenario ? `
+        <div class="scenario-box">
+          <div class="scenario-label">📍 Scénario terrain</div>
+          <div class="scenario-text">${q.scenarioText}</div>
+        </div>
+      ` : ''}
+      <h2 class="q-title">${q.title}</h2>
+      <p class="q-subtitle">${q.subtitle}</p>
+      ${q.type==='multi'?'<div class="multi-hint">Plusieurs réponses possibles</div>':''}
+      <div class="options">
+        ${q.options.map((opt,i)=>{
+          const isSelected = answered.includes(opt.key);
+          let cls = isSelected ? 'selected' : '';
+          return `
+            <div class="option ${cls}" onclick="selectOption('${qId}','${opt.key}','${q.type}')">
+              <div class="option-key">${opt.key.toUpperCase()}</div>
+              <div class="option-content">
+                <div class="option-text">${opt.text}</div>
+                ${opt.sub?`<div class="option-sub">${opt.sub}</div>`:''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      ${q.tip?`<div class="info-tip">💡 ${q.tip}</div>`:''}
+    </div>
+    <div class="q-nav">
+      <button class="btn btn-secondary" onclick="prevQ()" ${state.currentQIdx===0?'disabled':''}>← Précédent</button>
+      <span class="step-counter">${state.currentQIdx+1} / ${totalQ()}</span>
+      <button class="btn btn-primary" onclick="nextQ()" ${!canNext?'disabled':''}>
+        ${state.currentQIdx===totalQ()-1?'Voir mon diagnostic':'Suivant →'}
+      </button>
+    </div>
+  `;
+}
+
+function selectOption(qId, key, type) {
+  if(type==='single') {
+    state.answers[qId] = [key];
+  } else {
+    const arr = state.answers[qId] || [];
+    const idx = arr.indexOf(key);
+    if(idx>-1) arr.splice(idx,1);
+    else arr.push(key);
+    state.answers[qId] = arr;
+  }
+  renderQuestion();
+}
+
+function nextQ() {
+  if(state.currentQIdx < totalQ()-1) {
+    state.currentQIdx++;
+    render();
+    card.scrollIntoView({behavior:'smooth',block:'start'});
+  } else {
+    state.screen='result';
+    render();
+    card.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function prevQ() {
+  if(state.currentQIdx > 0) {
+    state.currentQIdx--;
+    render();
+    card.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function renderResult() {
+  const sc = computeScore();
+  const level = getLevel(sc.pct);
+  const levels = {
+    red: {
+      emoji:'🔴', label:'Conformité insuffisante – Risque élevé',
+      cls:'level-red',
+      title:'Votre administration est exposée à des risques significatifs',
+      subtitle:'Notre diagnostic révèle des lacunes importantes dans votre approche de la signature électronique. Des actions correctrices prioritaires s\'imposent pour vous conformer aux exigences légales et protéger votre administration.',
+    },
+    orange: {
+      emoji:'🟠', label:'Maturité intermédiaire – Améliorations nécessaires',
+      cls:'level-orange',
+      title:'De bonnes bases, mais des angles morts à combler',
+      subtitle:'Votre administration a pris conscience des enjeux et posé les premières briques. Des améliorations ciblées sur vos processus, votre gouvernance et votre formation vous permettront de franchir un pallier décisif.',
+    },
+    green: {
+      emoji:'🟢', label:'Bonne conformité – Processus solides',
+      cls:'level-green',
+      title:'Votre administration montre une vraie culture de la conformité numérique',
+      subtitle:'Vous avez intégré les bonnes pratiques de la signature électronique dans vos processus. Quelques points de vigilance subsistent pour maintenir et renforcer ce niveau d\'excellence opérationnelle.',
+    }
+  }[level];
+
+  const deg = Math.round((sc.pct/100)*360);
+  const scoreColor = level==='red'?'var(--red)':level==='orange'?'var(--orange)':'var(--green)';
+
+  // Module results
+  const modUsed = [...new Set(getQList().map(id=>QUESTIONS[id].mod))];
+
+  // Recommendations
+  const recos = getRecos(level, sc);
+
+  card.innerHTML = `
+    <div class="result">
+      <div class="result-header">
+        <div class="result-level ${levels.cls}">${levels.emoji} ${levels.label}</div>
+        <h2 class="result-title">${levels.title}</h2>
+        <p class="result-subtitle">${levels.subtitle}</p>
+        <div class="score-ring-wrap">
+          <div class="score-ring" style="--score-pct:${deg}deg;--score-color:${scoreColor};">
+            <div class="score-value">
+              <div class="score-num">${sc.pct}%</div>
+              <div class="score-max">de conformité</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modules-grid">
+        ${modUsed.map(m => {
+          const ms = sc.modScores[m];
+          const mpct = ms.m>0?Math.round((ms.s/ms.m)*100):0;
+          const mcolor = mpct<40?'var(--red)':mpct<70?'var(--orange)':'var(--green)';
+          return `
+            <div class="mod-result">
+              <div class="mod-result-label">${MODULES[m].label}</div>
+              <div class="mod-result-name">${MODULES[m].name}</div>
+              <div class="mod-bar"><div class="mod-bar-fill" style="width:${mpct}%;background:${mcolor};"></div></div>
+              <div class="mod-score-text">${mpct}% · ${ms.s}/${ms.m} pts</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="reco-section">
+        <h3 class="reco-title">Recommandations prioritaires</h3>
+        <div class="reco-list">
+          ${recos.map(r=>`
+            <div class="reco-item">
+              <div class="reco-icon">${r.icon}</div>
+              <div class="reco-content">
+                <div class="reco-text">${r.text}</div>
+                <div class="reco-sub">${r.sub}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="cta-block">
+        <div class="cta-eyebrow">Solution recommandée</div>
+        <h3 class="cta-title">eSignFlow — La signature électronique pensée pour les administrations belges</h3>
+        <p class="cta-text">Conçue spécifiquement pour les Communes, CPAS et Intercommunales, eSignFlow répond aux exigences terrain que ce diagnostic a mis en lumière. Simple d'usage pour les agents, conforme pour les juristes, sécurisée pour l'IT.</p>
+        <div class="cta-features">
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Conformité eIDAS & droit belge — niveaux simple, avancé et qualifié</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Intégration itsme® & eID pour les citoyens et les agents</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Workflows internes, délégation de signature, signature en masse</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Journal de preuve automatique & archivage conforme AGR</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Hébergement RGPD en Belgique — aucune donnée hors UE</div>
+        </div>
+        <div class="cta-actions">
+          <a href="https://www.esignflow.be/fr-be/faq" target="_blank" class="btn-gold">En savoir plus →</a>
+          <a href="https://www.esignflow.be" target="_blank" class="btn-outline-white">Demander une démonstration</a>
+        </div>
+      </div>
+
+      <div class="result-restart">
+        <button class="btn-text" onclick="restart()">↩ Recommencer avec une autre version</button>
+      </div>
+    </div>
+  `;
+
+  // Animate module bars
+  setTimeout(()=>{
+    document.querySelectorAll('.mod-bar-fill').forEach(el=>{
+      const w = el.style.width;
+      el.style.width='0';
+      setTimeout(()=>el.style.width=w,50);
+    });
+  },100);
+}
+
+function getRecos(level, sc) {
+  const all = {
+    red: [
+      { icon:'⚖️', text:'Établir immédiatement une doctrine interne sur les niveaux de signature', sub:'Définissez par type de document quel niveau eIDAS s\'applique (simple / avancé / qualifié). Formalisez ce référentiel dans votre règlement intérieur.' },
+      { icon:'🚨', text:'Auditer vos marchés publics récents pour identifier les risques de nullité', sub:'Les documents signés avec un outil non certifié eIDAS pour des marchés > 30.000€ HTVA peuvent être contestés. Un audit juridique préventif est recommandé.' },
+      { icon:'👥', text:'Former en priorité les agents à risque : RH, marchés publics, secrétariat', sub:'Une session de 2h sur les bases de la signature électronique réduit considérablement les erreurs les plus coûteuses.' },
+      { icon:'🔧', text:'Évaluer et déployer une solution certifiée eIDAS adaptée à vos usages', sub:'Priorisez une solution qui couvre vos besoins actuels (contrats, délibérations, marchés) avec une feuille de route claire vers la signature citoyenne.' },
+    ],
+    orange: [
+      { icon:'📋', text:'Formaliser votre politique de délégation de signature', sub:'Un cadre clair sur qui peut signer quoi, dans quelles conditions, protège l\'administration et fluidifie les processus.' },
+      { icon:'🗄️', text:'Renforcer votre archivage et la production automatique de journaux de preuve', sub:'En cas de contentieux, le journal de preuve horodaté est votre première ligne de défense. Vérifiez que votre outil le génère automatiquement.' },
+      { icon:'🔄', text:'Automatiser les workflows de validation documentaire récurrents', sub:'Contrats RH, délibérations, marchés : ces flux prévisibles gagnent à être automatisés pour réduire les délais et les risques d\'erreur.' },
+      { icon:'📱', text:'Évaluer l\'ouverture de la signature aux citoyens et aux élus', sub:'La signature à distance via itsme® est une attente croissante des citoyens et permet de moderniser l\'image de votre administration.' },
+    ],
+    green: [
+      { icon:'🏆', text:'Documenter et partager vos bonnes pratiques en interne', sub:'Votre niveau de maturité est au-dessus de la moyenne. Capitalisez sur ces acquis en formalisant vos procédures comme référence interne.' },
+      { icon:'🔍', text:'Réaliser un audit annuel de conformité eIDAS', sub:'La réglementation évolue. Un audit annuel garantit que vos pratiques restent alignées avec le cadre légal européen et belge.' },
+      { icon:'🚀', text:'Envisager l\'extension de la signature électronique aux processus citoyens', sub:'Si ce n\'est pas encore le cas, la signature citoyenne à distance est la prochaine étape naturelle de votre transformation numérique.' },
+      { icon:'🤝', text:'Partager votre expérience avec d\'autres administrations de votre réseau', sub:'Les administrations belges progressent plus vite en partageant leurs retours d\'expérience. UVCW, AVCB, VVSG sont des vecteurs naturels.' },
+    ],
+  }[level];
+  return all;
+}
+
+function restart() {
+  state.screen = 'cover';
+  state.answers = {};
+  state.currentQIdx = 0;
+  render();
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>

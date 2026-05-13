@@ -6,12 +6,14 @@
 <title>Diagnostic Signature Électronique – Administrations publiques</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,800;1,300&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- jsPDF — génération PDF côté client, sans window.print(), compatible iFrame cross-origin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --navy: #0d1f3c;
     --navy-light: #152c52;
-    --brand: #4680F7;         /* nouvelle couleur branding */
-    --brand-light: #6b9aff;   /* déclinaison plus claire */
+    --brand: #4680F7;
+    --brand-light: #6b9aff;
     --gold: #e8a020;
     --gold-light: #f5c45a;
     --cream: #f7f4ef;
@@ -31,18 +33,17 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Montserrat', sans-serif;  /* police principale modifiée */
+    font-family: 'Montserrat', sans-serif;
     background: var(--navy);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* ── Background ── */
   .bg-pattern {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(70,128,247,0.18) 0%, transparent 60%),  /* brand #4680F7 */
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(70,128,247,0.18) 0%, transparent 60%),
       radial-gradient(ellipse 50% 60% at 80% 80%, rgba(232,160,32,0.12) 0%, transparent 60%),
       var(--navy);
   }
@@ -53,28 +54,20 @@
     background-size: 48px 48px;
   }
 
-  /* ── Layout ── */
   .app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 16px 60px; }
 
-  /* ── Top Bar (logo vectoriel) ── */
   .topbar {
     width: 100%; max-width: 860px;
     display: flex; align-items: center; justify-content: space-between;
     padding: 24px 0 32px;
   }
-  .logo svg {
-    display: block;
-    height: 40px;               /* hauteur confortable */
-    width: auto;
-    fill: none;                 /* le svg gère ses couleurs */
-  }
+  .logo svg { display: block; height: 40px; width: auto; fill: none; }
   .badge-secure {
     font-size: 11px; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15);
     padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
     font-family: 'Montserrat', sans-serif;
   }
 
-  /* ── Card ── */
   .card {
     width: 100%; max-width: 860px;
     background: var(--cream);
@@ -88,17 +81,13 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Progress Bar (brand) ── */
-  .progress-bar-wrap {
-    height: 5px; background: var(--cream-dark); position: relative;
-  }
+  .progress-bar-wrap { height: 5px; background: var(--cream-dark); position: relative; }
   .progress-bar-fill {
     height: 100%; background: linear-gradient(90deg, var(--brand), var(--gold));
     transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
     border-radius: 0 3px 3px 0;
   }
 
-  /* ── Module Label (brand dot) ── */
   .module-label {
     display: flex; align-items: center; gap: 10px;
     padding: 20px 36px 0;
@@ -106,33 +95,24 @@
     color: var(--text-muted);
     font-family: 'Montserrat', sans-serif;
   }
-  .module-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--brand), var(--gold));
-  }
+  .module-dot { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--gold)); }
 
-  /* ── Question Body ── */
   .q-body { padding: 24px 36px 36px; }
   .q-number { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; font-family: 'Montserrat', sans-serif; }
-  .q-title {
-    font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 22px;
-    line-height: 1.4; color: var(--navy); margin-bottom: 8px;
-  }
+  .q-title { font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 22px; line-height: 1.4; color: var(--navy); margin-bottom: 8px; }
   .q-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; font-family: 'Montserrat', sans-serif; }
 
-  /* ── Scenario Box (brand accent) ── */
   .scenario-box {
     background: var(--navy); color: white; border-radius: 12px;
     padding: 20px 24px; margin-bottom: 24px; position: relative; overflow: hidden;
   }
   .scenario-box::before {
-    content: '"'; font-family: 'Montserrat', sans-serif; font-size: 80px; color: var(--brand-light); /* #6b9aff */
+    content: '"'; font-family: 'Montserrat', sans-serif; font-size: 80px; color: var(--brand-light);
     opacity: 0.2; position: absolute; top: -10px; left: 16px; line-height: 1;
   }
   .scenario-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--brand-light); margin-bottom: 8px; font-weight: 600; }
   .scenario-text { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.85); font-family: 'Montserrat', sans-serif; }
 
-  /* ── Options (brand selected) ── */
   .options { display: flex; flex-direction: column; gap: 10px; }
   .option {
     display: flex; align-items: flex-start; gap: 14px;
@@ -143,8 +123,6 @@
   }
   .option:hover { border-color: var(--brand-light); transform: translateX(4px); }
   .option.selected { border-color: var(--brand); background: #eef3ff; }
-  .option.correct { border-color: var(--green); background: #f0fdf4; }
-  .option.risky { border-color: var(--orange); background: #fff7ed; }
   .option-key {
     width: 28px; height: 28px; min-width: 28px; border-radius: 8px;
     background: var(--cream-dark); display: flex; align-items: center; justify-content: center;
@@ -156,10 +134,8 @@
   .option-text { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; font-family: 'Montserrat', sans-serif; }
   .option-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-family: 'Montserrat', sans-serif; }
 
-  /* ── Multi-select ── */
   .multi-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; font-style: italic; font-family: 'Montserrat', sans-serif; }
 
-  /* ── Info Tip (brand border) ── */
   .info-tip {
     margin-top: 20px; padding: 14px 18px;
     background: linear-gradient(135deg, rgba(70,128,247,0.08), rgba(232,160,32,0.06));
@@ -169,7 +145,6 @@
   }
   .info-tip strong { color: var(--navy); }
 
-  /* ── Navigation ── */
   .q-nav {
     padding: 0 36px 32px;
     display: flex; justify-content: space-between; align-items: center;
@@ -178,17 +153,14 @@
     padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 600;
     cursor: pointer; border: none; transition: all 0.2s ease; font-family: 'Montserrat', sans-serif;
   }
-  .btn-primary {
-    background: var(--navy); color: white;
-    box-shadow: 0 4px 16px rgba(13,31,60,0.2);
-  }
+  .btn-primary { background: var(--navy); color: white; box-shadow: 0 4px 16px rgba(13,31,60,0.2); }
   .btn-primary:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,31,60,0.3); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .btn-secondary { background: transparent; color: var(--text-muted); }
   .btn-secondary:hover { color: var(--navy); }
   .step-counter { font-size: 13px; color: var(--text-muted); font-family: 'Montserrat', sans-serif; }
 
-  /* ── Cover Screen (brand accent) ── */
+  /* ── Cover ── */
   .cover { padding: 48px 36px 40px; }
   .cover-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
@@ -197,29 +169,13 @@
     background: rgba(70,128,247,0.08); padding: 6px 14px; border-radius: 20px;
     font-family: 'Montserrat', sans-serif;
   }
-  .cover-title {
-    font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 800; color: var(--navy);
-    line-height: 1.2; margin-bottom: 16px;
-  }
+  .cover-title { font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 800; color: var(--navy); line-height: 1.2; margin-bottom: 16px; }
   .cover-title em { font-style: italic; color: var(--brand); }
   .cover-lead { font-size: 16px; color: var(--text-muted); line-height: 1.7; margin-bottom: 32px; max-width: 100%; font-family: 'Montserrat', sans-serif; }
-  .cover-features { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 36px; }
-  .cover-feat {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; color: var(--text); font-weight: 500;
-    background: white; padding: 8px 16px; border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(13,31,60,0.07);
-    font-family: 'Montserrat', sans-serif;
-  }
-  .cover-feat-icon { font-size: 16px; }
   .version-selector { margin-bottom: 32px; }
   .version-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Montserrat', sans-serif; }
   .version-cards { display: flex; gap: 12px; flex-wrap: wrap; }
-  .ver-card {
-    flex: 1; min-width: 160px; padding: 16px; border-radius: 12px;
-    background: white; border: 2px solid var(--cream-dark); cursor: pointer;
-    transition: all 0.2s; text-align: center;
-  }
+  .ver-card { flex: 1; min-width: 160px; padding: 16px; border-radius: 12px; background: white; border: 2px solid var(--cream-dark); cursor: pointer; transition: all 0.2s; text-align: center; }
   .ver-card:hover { border-color: var(--brand-light); }
   .ver-card.active { border-color: var(--brand); background: #eef3ff; }
   .ver-icon { font-size: 24px; margin-bottom: 6px; }
@@ -227,7 +183,121 @@
   .ver-time { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: 'Montserrat', sans-serif; }
   .cover-disclaimer { font-size: 12px; color: var(--text-muted); margin-top: 20px; font-family: 'Montserrat', sans-serif; }
 
-  /* ── Result Screen (brand used) ── */
+  /* ── Lead Capture Interstitiel ── */
+  .lead-capture { padding: 48px 36px 40px; }
+  .lc-progress-hint {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-muted); margin-bottom: 28px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .lc-progress-step {
+    padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .lc-progress-step.done { background: rgba(22,163,74,0.12); color: var(--green); }
+  .lc-progress-step.active { background: rgba(70,128,247,0.12); color: var(--brand); }
+  .lc-progress-step.next { background: var(--cream-dark); color: var(--text-muted); }
+  .lc-progress-arrow { color: var(--text-muted); font-size: 12px; }
+  .lc-header { margin-bottom: 28px; }
+  .lc-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
+    color: var(--brand); margin-bottom: 14px;
+    background: rgba(70,128,247,0.08); padding: 5px 12px; border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .lc-title { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; color: var(--navy); line-height: 1.3; margin-bottom: 10px; }
+  .lc-subtitle { font-size: 14px; color: var(--text-muted); line-height: 1.6; font-family: 'Montserrat', sans-serif; }
+  .lc-optional-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: var(--text-muted); background: var(--cream-dark);
+    padding: 3px 10px; border-radius: 20px; margin-left: 8px;
+    font-family: 'Montserrat', sans-serif; vertical-align: middle;
+  }
+  .lc-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .lc-field { display: flex; flex-direction: column; gap: 5px; }
+  .lc-field.full { grid-column: 1 / -1; }
+  .lc-field.span2 { grid-column: 1 / -1; }
+  .lc-field label {
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .lc-field input, .lc-field select {
+    padding: 10px 14px; border-radius: 10px;
+    border: 1.5px solid var(--cream-dark);
+    background: white; color: var(--text);
+    font-size: 14px; font-family: 'Montserrat', sans-serif;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .lc-field input:focus, .lc-field select:focus { border-color: var(--brand); }
+  .lc-field input::placeholder { color: #b0b8c8; }
+  .lc-consents { display: flex; flex-direction: column; gap: 8px; margin: 20px 0 0; }
+  .lc-consent {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 14px; border-radius: 10px;
+    background: white; border: 1.5px solid var(--cream-dark);
+    transition: border-color 0.2s;
+  }
+  .lc-consent:has(input:checked) { border-color: var(--brand); }
+  .lc-consent input[type="checkbox"] {
+    width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0;
+    accent-color: var(--brand); cursor: pointer;
+  }
+  .lc-consent label {
+    font-size: 13px; color: var(--text); line-height: 1.5;
+    font-family: 'Montserrat', sans-serif; cursor: pointer;
+  }
+  .lc-consent label .lc-consent-required {
+    font-size: 11px; font-weight: 600; color: var(--brand); margin-left: 4px;
+  }
+  .lc-consent label .lc-consent-opt {
+    font-size: 11px; color: var(--text-muted); margin-left: 4px;
+  }
+  .lc-rgpd-clause {
+    margin-top: 14px; font-size: 11px; color: var(--text-muted);
+    line-height: 1.6; font-family: 'Montserrat', sans-serif;
+    border-top: 1px solid var(--cream-dark); padding-top: 12px;
+  }
+  .lc-rgpd-clause a { color: var(--text-muted); text-decoration: underline; }
+  .lc-actions { display: flex; align-items: center; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+  .btn-lc-submit {
+    padding: 13px 32px; border-radius: 10px; font-size: 14px; font-weight: 700;
+    cursor: pointer; border: none; font-family: 'Montserrat', sans-serif;
+    background: var(--navy); color: white;
+    box-shadow: 0 4px 16px rgba(13,31,60,0.2);
+    transition: all 0.2s ease;
+  }
+  .btn-lc-submit:hover { background: var(--navy-light); transform: translateY(-1px); }
+  .btn-lc-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-lc-skip {
+    background: none; border: none; font-family: 'Montserrat', sans-serif;
+    font-size: 13px; color: var(--text-muted); cursor: pointer;
+    text-decoration: underline; padding: 0;
+  }
+  .btn-lc-skip:hover { color: var(--text); }
+  .lc-rgpd-note {
+    margin-top: 20px; padding: 12px 16px;
+    background: white; border-radius: 10px;
+    border-left: 3px solid var(--cream-dark);
+    font-size: 12px; color: var(--text-muted); line-height: 1.6;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .lc-rgpd-note strong { color: var(--text); }
+  .lc-sending { text-align: center; padding: 20px 0; }
+  .lc-sending-spinner {
+    width: 32px; height: 32px; border: 3px solid var(--cream-dark);
+    border-top-color: var(--brand); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .lc-error {
+    margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+    background: #fef2f2; color: var(--red); font-size: 13px;
+    font-family: 'Montserrat', sans-serif; display: none;
+  }
+
+  /* ── Result ── */
   .result { padding: 40px 36px; }
   .result-header { text-align: center; margin-bottom: 40px; }
   .result-level {
@@ -242,7 +312,6 @@
   .result-title { font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 800; color: var(--navy); margin-bottom: 12px; line-height: 1.3; }
   .result-subtitle { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 560px; margin: 0 auto; font-family: 'Montserrat', sans-serif; }
 
-  /* Score Ring */
   .score-ring-wrap { display: flex; justify-content: center; margin: 32px 0; }
   .score-ring {
     width: 140px; height: 140px; border-radius: 50%;
@@ -253,40 +322,27 @@
     content: ''; position: absolute; width: 104px; height: 104px;
     background: var(--cream); border-radius: 50%;
   }
-  .score-value {
-    position: relative; z-index: 1; text-align: center;
-  }
+  .score-value { position: relative; z-index: 1; text-align: center; }
   .score-num { font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 800; color: var(--navy); line-height: 1; }
   .score-max { font-size: 12px; color: var(--text-muted); font-family: 'Montserrat', sans-serif; }
 
-  /* Modules Result */
   .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
   @media(max-width:600px){ .modules-grid { grid-template-columns: 1fr; } }
-  .mod-result {
-    background: white; border-radius: 12px; padding: 20px;
-    box-shadow: 0 2px 12px rgba(13,31,60,0.07);
-  }
+  .mod-result { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(13,31,60,0.07); }
   .mod-result-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
   .mod-result-name { font-weight: 700; font-size: 15px; color: var(--navy); margin-bottom: 12px; font-family: 'Montserrat', sans-serif; }
   .mod-bar { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; }
   .mod-bar-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.22,1,0.36,1); }
   .mod-score-text { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: 'Montserrat', sans-serif; }
 
-  /* Recommendations */
   .reco-section { margin: 32px 0; }
   .reco-title { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 600; color: var(--navy); margin-bottom: 20px; }
   .reco-list { display: flex; flex-direction: column; gap: 12px; }
-  .reco-item {
-    display: flex; gap: 14px; align-items: flex-start;
-    background: white; border-radius: 12px; padding: 16px 20px;
-    box-shadow: 0 2px 8px rgba(13,31,60,0.06);
-  }
+  .reco-item { display: flex; gap: 14px; align-items: flex-start; background: white; border-radius: 12px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(13,31,60,0.06); }
   .reco-icon { font-size: 20px; min-width: 24px; margin-top: 1px; }
-  .reco-content {}
   .reco-text { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 500; font-family: 'Montserrat', sans-serif; }
   .reco-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; font-family: 'Montserrat', sans-serif; }
 
-  /* CTA (brand enhanced) */
   .cta-block {
     background: var(--navy); border-radius: 16px; padding: 32px;
     margin: 32px 0; color: white; position: relative; overflow: hidden;
@@ -294,14 +350,14 @@
   .cta-block::after {
     content: ''; position: absolute; right: -30px; top: -30px;
     width: 180px; height: 180px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(70,128,247,0.2), transparent); /* brand */
+    background: radial-gradient(circle, rgba(70,128,247,0.2), transparent);
   }
   .cta-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--brand-light); margin-bottom: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
   .cta-title { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 600; margin-bottom: 12px; line-height: 1.3; }
   .cta-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 24px; max-width: 480px; font-family: 'Montserrat', sans-serif; }
   .cta-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
   .cta-feat { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85); font-family: 'Montserrat', sans-serif; }
-  .cta-feat-check { color: var(--brand-light); font-weight: 700; } /* #6b9aff */
+  .cta-feat-check { color: var(--brand-light); font-weight: 700; }
   .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
   .btn-gold {
     background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--navy);
@@ -318,12 +374,20 @@
   }
   .btn-outline-white:hover { border-color: white; background: rgba(255,255,255,0.05); }
 
-  /* ── Commercial Cards ── */
-  .demo-section { margin-top: 28px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 24px; }
-  .demo-label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--brand-light);
-    font-weight: 600; font-family: 'Montserrat', sans-serif; margin-bottom: 16px;
+  /* ── Bouton PDF ── */
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: rgba(255,255,255,0.85);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Montserrat', sans-serif;
+    transition: all 0.2s; text-decoration: none;
   }
+  .btn-pdf:hover { border-color: white; background: rgba(255,255,255,0.07); }
+  .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .demo-section { margin-top: 28px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 24px; }
+  .demo-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--brand-light); font-weight: 600; font-family: 'Montserrat', sans-serif; margin-bottom: 16px; }
   .commercial-cards { display: flex; gap: 14px; flex-wrap: wrap; }
   .commercial-card {
     flex: 1; min-width: 220px;
@@ -333,17 +397,11 @@
   }
   .commercial-card:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
   .commercial-info { display: flex; align-items: center; gap: 14px; }
-  .commercial-photo {
-    width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
-    border: 2.5px solid rgba(70,128,247,0.5); flex-shrink: 0;
-  }
+  .commercial-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2.5px solid rgba(70,128,247,0.5); flex-shrink: 0; }
   .commercial-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: white; margin-bottom: 2px; }
   .commercial-title { font-size: 11px; color: var(--brand-light); font-weight: 600; font-family: 'Montserrat', sans-serif; }
-  .commercial-territory {
-    font-size: 12px; color: rgba(255,255,255,0.6); font-family: 'Montserrat', sans-serif;
-    line-height: 1.5; display: flex; gap: 7px; align-items: flex-start;
-  }
-  .commercial-territory::before { content: '📍'; font-size: 13px; flex-shrink: 0; margin-top: 0px; }
+  .commercial-territory { font-size: 12px; color: rgba(255,255,255,0.6); font-family: 'Montserrat', sans-serif; line-height: 1.5; display: flex; gap: 7px; align-items: flex-start; }
+  .commercial-territory::before { content: '📍'; font-size: 13px; flex-shrink: 0; }
   .btn-demo-contact {
     display: block; text-align: center; background: linear-gradient(135deg, var(--gold), var(--gold-light));
     color: var(--navy); font-weight: 700; padding: 10px 16px; border-radius: 8px;
@@ -354,25 +412,30 @@
   .result-restart { text-align: center; margin-top: 24px; }
   .btn-text { background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; text-decoration: underline; font-family: 'Montserrat', sans-serif; }
 
-  /* ── Legal strip ── */
+  /* Bandeau de confirmation post-soumission */
+  .lc-confirmation-banner {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(22,163,74,0.08); border: 1.5px solid rgba(22,163,74,0.25);
+    border-radius: 12px; padding: 14px 20px; margin-bottom: 28px;
+    font-size: 13px; color: var(--green); font-family: 'Montserrat', sans-serif;
+  }
+
   .legal-strip {
     margin-top: 40px; font-size: 11px; color: rgba(255,255,255,0.3);
-    text-align: center; line-height: 1.8;
-    font-family: 'Montserrat', sans-serif;
+    text-align: center; line-height: 1.8; font-family: 'Montserrat', sans-serif;
   }
   .legal-strip a { color: rgba(255,255,255,0.4); }
 
-  /* ── Responsive ── */
   @media(max-width: 640px){
-    .cover { padding: 32px 20px 28px; }
+    .cover, .lead-capture { padding: 32px 20px 28px; }
     .q-body { padding: 20px 20px 28px; }
     .q-nav { padding: 0 20px 24px; }
     .module-label { padding: 16px 20px 0; }
-    .cover-title { font-size: 26px; }
+    .cover-title, .lc-title { font-size: 22px; }
     .q-title { font-size: 18px; }
     .result { padding: 28px 20px; }
     .cta-block { padding: 24px 20px; }
-    .logo svg { height: 32px; }
+    .lc-form-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -383,12 +446,8 @@
 <div class="app">
   <div class="topbar">
     <div class="logo">
-      <!-- Logo officiel eSignFlow (format inversé pour fond bleu) -->
-      <img src="https://www.esignflow.be/img/esignflow-inverted-logo-baseline-FR.svg" 
-           alt="eSignFlow" 
-           style="height: 40px; width: auto; display: block;">
+      <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="284.87" height="60" viewBox="0 0 284.87 60" style="height:36px;width:auto;display:block;" role="img" aria-label="eSignFlow"><defs><style>.cls-1{isolation:isolate;}.cls-2{fill:#fff;stroke-width:0px;}</style></defs><path class="cls-2" d="M42.98,6.92H11.91c-1.71,0-3.09-1.39-3.09-3.09s1.38-3.09,3.09-3.09h31.07c1.71,0,3.09,1.39,3.09,3.09s-1.38,3.09-3.09,3.09Z"/><path class="cls-2" d="M20.98,19.84H3.67c-1.71,0-3.09-1.38-3.09-3.09s1.38-3.09,3.09-3.09h17.31c1.71,0,3.09,1.39,3.09,3.09s-1.38,3.09-3.09,3.09Z"/><path class="cls-2" d="M42.98,58.56H11.91c-1.71,0-3.09-1.38-3.09-3.09s1.38-3.09,3.09-3.09h31.07c1.71,0,3.09,1.38,3.09,3.09s-1.38,3.09-3.09,3.09Z"/><path class="cls-2" d="M42.98,32.76H11.91c-1.71,0-3.09-1.38-3.09-3.09s1.38-3.09,3.09-3.09h31.07c1.71,0,3.09,1.38,3.09,3.09s-1.38,3.09-3.09,3.09Z"/><circle class="cls-2" cx="50.87" cy="3.82" r="3.29"/><circle class="cls-2" cx="29.56" cy="16.74" r="3.29"/><circle class="cls-2" cx="3.67" cy="55.46" r="3.29"/><path class="cls-2" d="M97.64,37.1c.13.39.19.62.19.7,0,.21-.13.36-.39.46-2.09.93-4.55,1.39-7.38,1.39-3.22,0-5.64-.85-7.27-2.55-1.62-1.7-2.43-4.24-2.43-7.61s.81-5.99,2.43-7.85c1.62-1.85,3.89-2.78,6.8-2.78,2.68,0,4.7.84,6.07,2.51,1.36,1.67,2.05,4.16,2.05,7.46,0,.54-.01.93-.04,1.18-.03.25-.08.41-.17.5-.09.09-.26.13-.52.13h-10.94c.05,1.5.48,2.62,1.27,3.38.8.76,1.96,1.14,3.48,1.14s3.13-.3,4.83-.89c.13-.05.26-.1.41-.15s.25-.08.33-.08c.13,0,.22.02.27.06.05.04.1.12.16.25l.85,2.74ZM92.57,27.1c-.03-1.42-.3-2.45-.83-3.11-.53-.66-1.33-.99-2.42-.99-2.04,0-3.13,1.37-3.28,4.1h6.53Z"/><path class="cls-2" d="M106.33,26.32c-1.8-.8-3.14-1.78-4-2.94-.86-1.16-1.29-2.56-1.29-4.21,0-2.47.87-4.4,2.61-5.8,1.74-1.39,4.18-2.09,7.32-2.09,2.09,0,4.34.36,6.76,1.08.28.08.42.19.42.35,0,.1-.04.31-.12.62l-.89,3.36c-.05.13-.1.21-.15.25-.05.04-.13.06-.23.06-.18,0-.5-.08-.97-.23-2.06-.54-3.72-.81-4.99-.81-1.34,0-2.35.24-3.03.71-.68.48-1.02,1.17-1.02,2.07,0,.7.25,1.29.75,1.8.5.5,1.42,1.05,2.76,1.64l3.48,1.58c1.98.9,3.41,1.93,4.27,3.09.86,1.16,1.29,2.63,1.29,4.41,0,2.63-.89,4.68-2.67,6.17-1.78,1.48-4.24,2.22-7.38,2.22-2.96,0-5.8-.53-8.5-1.58-.31-.13-.46-.3-.46-.5,0-.08.02-.19.06-.33.04-.14.08-.28.14-.41l1-3.05c.1-.26.18-.41.23-.46s.12-.08.19-.08c.13,0,.33.05.62.15,2.29.88,4.39,1.32,6.3,1.32,3.06,0,4.6-1,4.6-3.01,0-.57-.11-1.05-.33-1.45-.22-.4-.62-.8-1.22-1.2-.59-.4-1.48-.87-2.67-1.41l-2.9-1.31Z"/><path class="cls-2" d="M129.13,14.15c0,.85-.28,1.52-.83,2.01s-1.33.73-2.34.73-1.78-.25-2.34-.73-.83-1.16-.83-2.01.28-1.52.83-2.01c.55-.49,1.33-.74,2.34-.74s1.75.25,2.32.74c.57.49.85,1.16.85,2.01ZM123.64,39.27c-.33,0-.5-.14-.5-.42v-19.17c0-.28.17-.42.5-.42h4.64c.33,0,.5.14.5.42v19.17c0,.28-.17.42-.5.42h-4.64Z"/><path class="cls-2" d="M151.24,23.08c-1.62,0-2.62-.04-2.98-.12.62.8.93,1.93.93,3.4,0,2.14-.71,3.82-2.13,5.04-1.42,1.22-3.38,1.84-5.87,1.84-.93,0-1.77-.08-2.51-.23l-.7,2.9h6.76c2.19,0,3.81.41,4.85,1.24,1.04.83,1.57,2.11,1.57,3.86,0,2.27-1.03,4.1-3.09,5.51s-4.78,2.11-8.15,2.11c-2.42,0-4.26-.41-5.51-1.22s-1.87-1.98-1.87-3.5c0-1.39.7-2.81,2.09-4.25-1.19-.23-1.78-.91-1.78-2.05,0-1.21.81-3.26,2.44-6.14-1.31-1.16-1.97-2.85-1.97-5.06,0-2.37.71-4.22,2.13-5.55,1.42-1.33,3.39-1.99,5.91-1.99,1.13,0,2.21.13,3.25.39h6.65c.31,0,.46.15.46.46v2.9c0,.31-.15.46-.46.46ZM138.48,39.73c-.59,1-.89,1.91-.89,2.71,0,.69.26,1.24.79,1.62.53.39,1.31.58,2.34.58,1.44,0,2.63-.28,3.55-.83.93-.55,1.39-1.28,1.39-2.18,0-.67-.2-1.15-.6-1.45-.4-.3-1.05-.44-1.95-.44h-4.64ZM141.31,29.45c1.8,0,2.71-1.09,2.71-3.28,0-2.32-.9-3.48-2.71-3.48s-2.67,1.07-2.67,3.21c0,1.21.21,2.11.62,2.69.41.58,1.09.87,2.05.87Z"/><path class="cls-2" d="M166.46,39.27c-.31,0-.46-.14-.46-.42v-12.1c0-1.05-.19-1.82-.58-2.3-.39-.48-1.02-.71-1.89-.71-1.03,0-2.14.32-3.32.97v14.14c0,.28-.17.42-.5.42h-4.64c-.34,0-.5-.14-.5-.42v-19.17c0-.28.17-.42.5-.42h3.75c.26,0,.44.14.54.42l.31.97c2.14-1.18,4.2-1.78,6.18-1.78s3.35.51,4.33,1.55c.98,1.03,1.47,2.54,1.47,4.52v13.91c0,.28-.18.42-.54.42h-4.64Z"/><path class="cls-2" d="M177.36,39.27c-.33,0-.5-.14-.5-.42V12.1c0-.28.17-.42.5-.42h16.46c.28,0,.42.17.42.5v3.9c0,.33-.14.5-.42.5h-11.17v6.26h8.12c.28,0,.43.17.43.5v3.9c0,.33-.14.5-.43.5h-8.12v11.09c0,.28-.17.42-.5.42h-4.79Z"/><path class="cls-2" d="M205.61,39.27c-.9.26-1.91.39-3.01.39-1.65,0-2.87-.52-3.67-1.57-.8-1.04-1.2-2.65-1.2-4.81V12.1c0-.28.17-.42.5-.42h4.64c.33,0,.5.14.5.42v20.48c0,.95.09,1.64.27,2.07.18.42.48.64.89.64h.73c.15,0,.26.1.31.31l.5,2.59c.05.26.08.49.08.7,0,.1-.04.18-.12.23-.08.05-.22.1-.43.16Z"/><path class="cls-2" d="M217.24,39.66c-3.04,0-5.31-.82-6.8-2.45-1.5-1.63-2.24-4.12-2.24-7.44,0-3.5.8-6.2,2.4-8.08s3.88-2.82,6.84-2.82,5.27.82,6.76,2.45c1.49,1.64,2.24,4.12,2.24,7.44,0,3.5-.8,6.2-2.4,8.08s-3.86,2.82-6.8,2.82ZM217.32,35.09c1.16,0,2.01-.44,2.55-1.31.54-.88.81-2.28.81-4.21,0-2.19-.26-3.76-.77-4.71-.52-.95-1.38-1.43-2.59-1.43s-2.01.45-2.55,1.33c-.54.89-.81,2.29-.81,4.19,0,2.19.26,3.76.77,4.71.52.95,1.38,1.43,2.59,1.43Z"/><path class="cls-2" d="M246.46,39.27c-.26,0-.42-.16-.5-.46l-3.17-14.18-3.17,14.18c-.08.31-.25.46-.5.46h-4.99c-.26,0-.42-.16-.5-.46l-5.06-18.74c-.03-.08-.05-.17-.08-.27-.03-.1-.04-.18-.04-.23,0-.21.13-.31.38-.31h4.75c.33,0,.51.13.54.38l2.71,14.11,2.98-14.11c.08-.26.23-.38.46-.38h4.95c.21,0,.34.03.41.1s.11.16.13.29l3.17,14.11,2.51-14.11c.02-.26.21-.38.54-.38h4.64c.26,0,.39.1.39.31,0,.05,0,.12-.02.19-.01.08-.04.18-.1.31l-4.91,18.74c-.08.31-.25.46-.5.46h-5.02Z"/><path class="cls-2" d="M51.38,45.48h-17.33c-1.71,0-3.1-1.39-3.1-3.1s1.39-3.1,3.1-3.1h17.33c1.71,0,3.1,1.39,3.1,3.1s-1.39,3.1-3.1,3.1Z"/><circle class="cls-2" cx="25.47" cy="42.38" r="3.3"/><g id="NEW_BASELINE_FR" class="cls-1"><g class="cls-1"><path class="cls-2" d="M154.92,51.38c-.68-.33-1.03-.84-1.03-1.54,0-.54.2-.97.59-1.28s.94-.47,1.62-.47c.53,0,1.04.07,1.51.2.08.02.12.04.15.06.02.02.03.05.03.08,0,.03,0,.06-.01.1,0,.03-.02.07-.02.1l-.17.77c-.01.05-.04.09-.06.1-.03.02-.06.02-.11.02s-.13-.02-.27-.05c-.13-.03-.29-.07-.47-.1s-.37-.04-.55-.04c-.44,0-.66.15-.66.45,0,.12.04.22.12.31s.22.17.41.26l.73.35c.44.21.76.44.95.7s.28.58.28.97c0,.55-.2.99-.6,1.31-.4.32-.94.49-1.64.49-.35,0-.71-.02-1.08-.07-.37-.05-.67-.11-.88-.17-.09-.03-.14-.07-.14-.12,0-.02,0-.05.01-.08,0-.03.01-.06.02-.1l.21-.85c.02-.05.03-.09.05-.11.02-.02.04-.03.07-.03.04,0,.13.02.28.07.21.04.43.09.65.14.22.04.45.07.68.07.49,0,.73-.15.73-.46,0-.14-.04-.25-.14-.34-.09-.09-.29-.21-.6-.36l-.72-.36Z"/><path class="cls-2" d="M160.83,46.71c0,.25-.08.44-.24.59-.16.14-.39.21-.68.21s-.52-.07-.68-.21c-.16-.14-.24-.34-.24-.59s.08-.44.24-.59c.16-.14.39-.21.68-.21s.51.07.68.21c.17.14.25.34.25.59ZM159.22,54.05c-.1,0-.15-.04-.15-.12v-5.6c0-.08.05-.12.15-.12h1.36c.1,0,.15.04.15.12v5.6c0,.08-.05.12-.15.12h-1.36Z"/><path class="cls-2" d="M167.29,49.32c-.47,0-.76-.01-.87-.03.18.23.27.56.27.99,0,.62-.21,1.12-.62,1.47-.41.36-.99.54-1.72.54-.27,0-.52-.02-.73-.07l-.2.85h1.98c.64,0,1.11.12,1.42.36s.46.62.46,1.13c0,.66-.3,1.2-.9,1.61-.6.41-1.4.62-2.38.62-.71,0-1.24-.12-1.61-.36-.37-.24-.55-.58-.55-1.02,0-.41.2-.82.61-1.24-.35-.07-.52-.27-.52-.6,0-.35.24-.95.71-1.8-.38-.34-.58-.83-.58-1.48,0-.69.21-1.23.62-1.62s.99-.58,1.73-.58c.33,0,.65.04.95.11h1.94c.09,0,.14.05.14.14v.85c0,.09-.04.13-.14.13ZM163.56,54.19c-.17.29-.26.56-.26.79,0,.2.08.36.23.47s.38.17.68.17c.42,0,.77-.08,1.04-.24.27-.16.41-.38.41-.64,0-.2-.06-.34-.17-.42-.12-.09-.31-.13-.57-.13h-1.36ZM164.39,51.19c.53,0,.79-.32.79-.96,0-.68-.26-1.02-.79-1.02s-.78.31-.78.94c0,.35.06.62.18.78.12.17.32.25.6.25Z"/><path class="cls-2" d="M171.74,54.05c-.09,0-.14-.04-.14-.12v-3.54c0-.31-.06-.53-.17-.67-.11-.14-.3-.21-.55-.21-.3,0-.62.09-.97.28v4.13c0,.08-.05.12-.15.12h-1.36c-.1,0-.15-.04-.15-.12v-5.6c0-.08.05-.12.15-.12h1.1c.08,0,.13.04.16.12l.09.28c.62-.35,1.23-.52,1.81-.52s.98.15,1.26.45c.29.3.43.74.43,1.32v4.07c0,.08-.05.12-.16.12h-1.36Z"/><path class="cls-2" d="M179.46,53.42c.04.11.06.18.06.2,0,.06-.04.11-.11.13-.61.27-1.33.41-2.16.41-.94,0-1.65-.25-2.12-.75-.47-.5-.71-1.24-.71-2.22s.24-1.75.71-2.29,1.14-.81,1.99-.81c.78,0,1.37.24,1.77.73.4.49.6,1.22.6,2.18,0,.16,0,.27-.01.34,0,.07-.02.12-.05.15s-.08.04-.15.04h-3.2c.01.44.14.77.37.99s.57.33,1.02.33.92-.09,1.41-.26c.04-.01.08-.03.12-.04.04-.02.07-.02.1-.02.04,0,.06,0,.08.02.02.01.03.04.05.07l.25.8ZM177.98,50.5c0-.41-.09-.72-.24-.91s-.39-.29-.71-.29c-.59,0-.92.4-.96,1.2h1.91Z"/><path class="cls-2" d="M180.84,54.05c-.1,0-.15-.04-.15-.12v-5.6c0-.08.05-.12.15-.12h1.07c.05,0,.09,0,.12.02.03.02.05.05.06.1l.09.29c.68-.32,1.24-.47,1.68-.47.11,0,.19,0,.23.02.04.01.06.05.06.1,0,.02,0,.05,0,.08,0,.03,0,.06-.02.1l-.15,1.02c0,.05-.02.09-.05.1-.03.01-.07.02-.13.02-.58,0-1.07.06-1.47.18v4.16c0,.08-.05.12-.15.12h-1.36Z"/><path class="cls-2" d="M190.45,54.05s-.08,0-.1-.02c-.02-.01-.04-.05-.05-.1l-.11-.34c-.27.2-.53.35-.79.44-.25.09-.52.14-.82.14-.53,0-.94-.15-1.25-.45-.3-.3-.46-.71-.46-1.23,0-.64.2-1.12.6-1.45.4-.33,1.02-.52,1.86-.57l.73-.04v-.2c0-.31-.07-.53-.21-.66-.14-.13-.37-.2-.68-.2-.23,0-.44.02-.66.05s-.39.07-.54.1-.25.05-.29.05c-.08,0-.13-.04-.14-.11l-.15-.72c-.01-.06-.03-.11-.03-.15,0-.04-.01-.08-.01-.11,0-.07.04-.11.11-.13.23-.08.53-.13.9-.18.37-.04.74-.06,1.13-.06.78,0,1.33.15,1.67.46s.51.81.51,1.5v3.87c0,.08-.05.12-.15.12h-1.1ZM190.08,51.4l-.73.06c-.57.04-.86.3-.86.78s.21.75.62.75c.32,0,.64-.13.97-.38v-1.2Z"/><path class="cls-2" d="M196.89,54.05c-.08,0-.13-.04-.16-.12l-.09-.28c-.62.35-1.23.52-1.81.52s-.98-.15-1.26-.45c-.29-.3-.43-.74-.43-1.32v-4.07c0-.08.05-.12.16-.12h1.35c.09,0,.14.04.14.12v3.61c0,.31.06.54.17.68.11.14.3.21.55.21.32,0,.65-.09.97-.28v-4.22c0-.08.05-.12.15-.12h1.36c.1,0,.15.04.15.12v5.6c0,.08-.05.12-.15.12h-1.1Z"/><path class="cls-2" d="M203.26,53.65c.02.1.03.16.03.19,0,.04,0,.07-.02.08-.01.02-.04.04-.09.05-.18.05-.4.1-.67.14-.26.04-.5.06-.71.06-.62,0-1.09-.14-1.4-.43-.31-.29-.46-.72-.46-1.3v-2.95h-.72c-.1,0-.15-.04-.15-.12v-1.04c0-.08.05-.12.15-.12h.72v-1.21c0-.08.05-.13.15-.14l1.19-.16s.08-.01.12-.02c.03,0,.06,0,.08,0,.08,0,.11.04.11.12v1.4h1.54c.1,0,.15.04.15.12v1.04c0,.08-.05.12-.15.12h-1.54v2.45c0,.32.04.55.13.69s.24.2.45.2c.11,0,.23,0,.34-.03.11-.02.21-.04.29-.05.08-.01.14-.02.17-.02s.05,0,.07.02c.02.02.03.04.05.09l.18.8Z"/></g><g class="cls-1"><path class="cls-2" d="M204.4,54.05c-.1,0-.15-.04-.15-.12v-5.6c0-.08.05-.12.15-.12h1.07c.05,0,.09,0,.12.02.03.02.05.05.06.1l.09.29c.68-.32,1.24-.47,1.68-.47.11,0,.19,0,.23.02.04.01.06.05.06.1,0,.02,0,.05,0,.08,0,.03,0,.06-.02.1l-.15,1.02c0,.05-.02.09-.05.1-.03.01-.07.02-.13.02-.58,0-1.07.06-1.47.18v4.16c0,.08-.05.12-.15.12h-1.36Z"/></g><g class="cls-1"><path class="cls-2" d="M213.12,53.42c.04.11.06.18.06.2,0,.06-.04.11-.11.13-.61.27-1.33.41-2.16.41-.94,0-1.65-.25-2.12-.75-.47-.5-.71-1.24-.71-2.22s.24-1.75.71-2.29,1.14-.81,1.99-.81c.78,0,1.37.24,1.77.73.4.49.6,1.22.6,2.18,0,.16,0,.27-.01.34,0,.07-.02.12-.05.15s-.08.04-.15.04h-3.2c.01.44.14.77.37.99s.57.33,1.02.33.92-.09,1.41-.26c.04-.01.08-.03.12-.04.04-.02.07-.02.1-.02.04,0,.06,0,.08.02.02.01.03.04.05.07l.25.8ZM211.64,50.5c0-.41-.09-.72-.24-.91s-.39-.29-.71-.29c-.59,0-.92.4-.96,1.2h1.91Z"/><path class="cls-2" d="M221.01,54.05c-.05,0-.09,0-.1-.03s-.02-.05-.02-.1v-3.55c0-.31-.05-.53-.16-.67s-.28-.2-.52-.2c-.3,0-.62.09-.95.27,0,.08.01.2.01.38v3.76c0,.08-.05.12-.15.12h-1.37c-.05,0-.09,0-.1-.03-.02-.02-.02-.05-.02-.1v-3.54c0-.31-.05-.53-.16-.67s-.28-.21-.53-.21c-.26,0-.58.09-.94.27v4.15c0,.08-.05.12-.15.12h-1.36c-.1,0-.15-.04-.15-.12v-5.6c0-.08.05-.12.15-.12h1.1c.08,0,.13.04.16.12l.09.28c.62-.35,1.2-.52,1.75-.52.32,0,.59.05.83.16.24.11.42.27.56.47.67-.42,1.3-.63,1.89-.63.54,0,.95.15,1.24.45.28.3.42.74.42,1.31v4.08c0,.08-.05.12-.15.12h-1.37Z"/><path class="cls-2" d="M228.74,53.42c.04.11.06.18.06.2,0,.06-.04.11-.11.13-.61.27-1.33.41-2.16.41-.94,0-1.65-.25-2.12-.75-.47-.5-.71-1.24-.71-2.22s.24-1.75.71-2.29,1.14-.81,1.99-.81c.78,0,1.37.24,1.77.73.4.49.6,1.22.6,2.18,0,.16,0,.27-.01.34,0,.07-.02.12-.05.15s-.08.04-.15.04h-3.2c.01.44.14.77.37.99s.57.33,1.02.33.92-.09,1.41-.26c.04-.01.08-.03.12-.04.04-.02.07-.02.1-.02.04,0,.06,0,.08.02.02.01.03.04.05.07l.25.8ZM227.26,50.5c0-.41-.09-.72-.24-.91s-.39-.29-.71-.29c-.59,0-.92.4-.96,1.2h1.91Z"/><path class="cls-2" d="M233.45,54.05c-.09,0-.14-.04-.14-.12v-3.54c0-.31-.06-.53-.17-.67-.11-.14-.3-.21-.55-.21-.3,0-.62.09-.97.28v4.13c0,.08-.05.12-.15.12h-1.36c-.1,0-.15-.04-.15-.12v-5.6c0-.08.05-.12.15-.12h1.1c.08,0,.13.04.16.12l.09.28c.62-.35,1.23-.52,1.81-.52s.98.15,1.26.45c.29.3.43.74.43,1.32v4.07c0,.08-.05.12-.16.12h-1.36Z"/><path class="cls-2" d="M240.04,53.65c.02.1.03.16.03.19,0,.04,0,.07-.02.08-.01.02-.04.04-.09.05-.18.05-.4.1-.67.14-.26.04-.5.06-.71.06-.62,0-1.09-.14-1.4-.43-.31-.29-.46-.72-.46-1.3v-2.95h-.72c-.1,0-.15-.04-.15-.12v-1.04c0-.08.05-.12.15-.12h.72v-1.21c0-.08.05-.13.15-.14l1.19-.16s.08-.01.12-.02c.03,0,.06,0,.08,0,.08,0,.11.04.11.12v1.4h1.54c.1,0,.15.04.15.12v1.04c0,.08-.05.12-.15.12h-1.54v2.45c0,.32.04.55.13.69s.24.2.45.2c.11,0,.23,0,.34-.03.11-.02.21-.04.29-.05.08-.01.14-.02.17-.02s.05,0,.07.02c.02.02.03.04.05.09l.18.8Z"/></g></g></svg>
     </div>
-    <div class="badge-secure">🔒 Données non stockées</div>
   </div>
 
   <div class="card" id="mainCard"></div>
@@ -400,19 +459,69 @@
 
 <script>
 // ══════════════════════════════════════════════════
-// DATA (identique à l'original, gardé pour cohérence)
+// CONFIGURATION — à adapter selon votre stack
+// ══════════════════════════════════════════════════
+const CONFIG = {
+  // ═══════════════════════════════════════════════════════════════════
+  // POWER AUTOMATE — collecte des leads vers Excel SharePoint (365)
+  // Données hébergées dans votre tenant Microsoft, UE, conforme RGPD.
+  // ═══════════════════════════════════════════════════════════════════
+  //
+  // ÉTAPE 1 — Préparer le fichier Excel sur SharePoint
+  //   · Créez un fichier Excel sur votre SharePoint (ex. /Sites/eSignFlow/leads.xlsx)
+  //   · Créez un tableau (Insertion → Tableau) nommé "Leads" avec ces colonnes :
+  //       Horodatage | Prenom | Nom | Commune | Fonction | Version | Score | Niveau | URL
+  //   · Les noms de colonnes doivent être identiques (sans accents pour Prenom/Nom).
+  //
+  // ÉTAPE 2 — Créer le flux Power Automate
+  //   · Allez sur make.powerautomate.com
+  //   · Nouveau flux → Flux de cloud instantané → "Lors de la réception d'une requête HTTP"
+  //   · Dans le déclencheur, collez ce schéma JSON dans "Schéma JSON du corps de la requête" :
+  //
+  //     {
+  //       "type": "object",
+  //       "properties": {
+  //         "timestamp":  { "type": "string" },
+  //         "prenom":     { "type": "string" },
+  //         "nom":        { "type": "string" },
+  //         "commune":    { "type": "string" },
+  //         "fonction":   { "type": "string" },
+  //         "version":    { "type": "string" },
+  //         "scorePct":   { "type": "integer" },
+  //         "niveau":     { "type": "string" },
+  //         "url":        { "type": "string" }
+  //       }
+  //     }
+  //
+  //   · Ajoutez une action : "Excel Online (Business) → Ajouter une ligne dans un tableau"
+  //       - Emplacement : SharePoint
+  //       - Bibliothèque de documents : Documents (ou votre bibliothèque)
+  //       - Fichier : leads.xlsx
+  //       - Tableau : Leads
+  //       - Mappez chaque colonne sur la valeur dynamique correspondante du déclencheur
+  //
+  //   · Sauvegardez et copiez l'URL HTTP POST générée par le déclencheur.
+  //
+  // ÉTAPE 3 — Coller l'URL ci-dessous (remplacer null) :
+  POWER_AUTOMATE_URL: 'https://default67d5bf391ef94dd58feb4bd7f2fabb.7f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0f45706c89824c4c9c175fd4c8314176/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=rJjfC2e97o5FBCyJq-XHcQFs-yqGBDyLWi_edEAm6Hk',
+
+  PRIVACY_URL: 'https://www.vandenbroele.be/fr-be/vie-privee',
+};
+
+// ══════════════════════════════════════════════════
+// DATA
 // ══════════════════════════════════════════════════
 const VERSIONS = {
-  court: { name: 'Rapide', icon: '⚡', time: '5 min', description: 'Essentiel', qIds: ['A1','A3','B2','C1','D1'] },
-  standard: { name: 'Standard', icon: '📋', time: '8–10 min', description: 'Complet & équilibré', qIds: ['A1','A2','A3','B1','B2','B3','C1','C2','D1','D2'] },
-  premium: { name: 'Premium', icon: '🏛️', time: '15–20 min', description: 'Scénarios immersifs', qIds: ['A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','D1','D2','D3'] }
+  court:    { name: 'Rapide',   icon: '⚡',  time: '5 min',      description: 'Essentiel',          qIds: ['A1','A3','B2','C1','D1'] },
+  standard: { name: 'Standard', icon: '📋',  time: '8–10 min',   description: 'Complet & équilibré', qIds: ['A1','A2','A3','B1','B2','B3','C1','C2','D1','D2'] },
+  premium:  { name: 'Premium',  icon: '🏛️', time: '15–20 min',  description: 'Scénarios immersifs', qIds: ['A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','D1','D2','D3'] }
 };
 
 const MODULES = {
-  A: { label: 'Partie 1', name: 'Conformité légale & eIDAS', color: '#4680F7' }, // brand
-  B: { label: 'Partie 2', name: 'Processus internes & validation', color: '#7c3aed' },
-  C: { label: 'Partie 3', name: 'Sécurité & gestion du risque', color: '#dc2626' },
-  D: { label: 'Partie 4', name: 'Maturité numérique', color: '#16a34a' },
+  A: { label: 'Partie 1', name: 'Conformité légale & eIDAS',          color: '#4680F7' },
+  B: { label: 'Partie 2', name: 'Processus internes & validation',    color: '#7c3aed' },
+  C: { label: 'Partie 3', name: 'Sécurité & gestion du risque',       color: '#dc2626' },
+  D: { label: 'Partie 4', name: 'Maturité numérique',                  color: '#16a34a' },
 };
 
 const QUESTIONS = {
@@ -430,7 +539,6 @@ const QUESTIONS = {
     tip: '<strong>Le règlement eIDAS (n°910/2014)</strong> définit 3 niveaux de signature : simple, avancée et qualifiée. La signature qualifiée a la même valeur juridique qu\'une signature manuscrite dans toute l\'UE. En Belgique, la circulaire 2022/C/34 précise les règles pour les actes administratifs.',
     maxScore: 3,
   },
-  // ... toutes les questions restent identiques (contenu non modifié)
   A2: {
     mod: 'A', number: 'A–02',
     title: 'Laquelle de ces affirmations concernant la signature qualifiée (SQE) est correcte ?',
@@ -635,13 +743,22 @@ const QUESTIONS = {
 };
 
 // ══════════════════════════════════════════════════
-// STATE & FONCTIONS (inchangés)
+// STATE
 // ══════════════════════════════════════════════════
-let state = { screen: 'cover', version: 'standard', currentQIdx: 0, answers: {} };
+let state = {
+  screen: 'cover',       // 'cover' | 'question' | 'leadcapture' | 'result'
+  version: 'standard',
+  currentQIdx: 0,
+  answers: {},
+  leadData: null,        // données collectées, null si skippé
+};
 
-function getQList() { return VERSIONS[state.version].qIds; }
-function totalQ() { return getQList().length; }
-function currentQId() { return getQList()[state.currentQIdx]; }
+// ══════════════════════════════════════════════════
+// HELPERS SCORE
+// ══════════════════════════════════════════════════
+function getQList()    { return VERSIONS[state.version].qIds; }
+function totalQ()      { return getQList().length; }
+function currentQId()  { return getQList()[state.currentQIdx]; }
 
 function computeScore() {
   let total = 0, maxTotal = 0;
@@ -651,14 +768,13 @@ function computeScore() {
     const answered = state.answers[qId] || [];
     let qScore = 0;
     if (q.type === 'single') {
-      const ans = answered[0];
-      const opt = q.options.find(o=>o.key===ans);
+      const opt = q.options.find(o => o.key === answered[0]);
       qScore = opt ? opt.score : 0;
     } else {
       answered.forEach(k => {
-        const opt = q.options.find(o=>o.key===k);
-        if(opt) qScore += opt.score;
-        if(opt && opt.risk) qScore -= 1;
+        const opt = q.options.find(o => o.key === k);
+        if (opt) qScore += opt.score;
+        if (opt && opt.risk) qScore -= 1;
       });
       qScore = Math.max(0, qScore);
     }
@@ -667,122 +783,678 @@ function computeScore() {
     modScores[q.mod].s += qScore;
     modScores[q.mod].m += q.maxScore;
   });
-  const pct = maxTotal > 0 ? Math.round((total/maxTotal)*100) : 0;
+  const pct = maxTotal > 0 ? Math.round((total / maxTotal) * 100) : 0;
   return { total, maxTotal, pct, modScores };
 }
 
-function getLevel(pct) { return pct<40?'red':pct<70?'orange':'green'; }
+function getLevel(pct) { return pct < 40 ? 'red' : pct < 70 ? 'orange' : 'green'; }
 
+// ══════════════════════════════════════════════════
+// LEAD CAPTURE — PAYLOAD & ENVOI
+// ══════════════════════════════════════════════════
+
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
 const card = document.getElementById('mainCard');
+
 function render() {
-  if(state.screen==='cover') renderCover();
-  else if(state.screen==='question') renderQuestion();
-  else if(state.screen==='result') renderResult();
+  if      (state.screen === 'cover')        renderCover();
+  else if (state.screen === 'question')     renderQuestion();
+  else if (state.screen === 'leadcapture')  renderLeadCapture();
+  else if (state.screen === 'result')       renderResult();
 }
 
-// fonctions de rendu (identiques mais adaptées au branding via CSS)
-function selectVersion(v) { state.version=v; state.answers={}; renderCover(); }
-function startQuiz() { state.screen='question'; state.currentQIdx=0; render(); }
-function selectOption(qId,key,type) {
-  if(type==='single') state.answers[qId]=[key];
-  else {
-    let arr=state.answers[qId]||[];
-    let idx=arr.indexOf(key);
-    if(idx>-1) arr.splice(idx,1); else arr.push(key);
-    state.answers[qId]=arr;
+function selectVersion(v) { state.version = v; state.answers = {}; renderCover(); }
+function startQuiz()       { state.screen = 'question'; state.currentQIdx = 0; render(); }
+
+function selectOption(qId, key, type) {
+  if (type === 'single') {
+    state.answers[qId] = [key];
+  } else {
+    let arr = state.answers[qId] || [];
+    const idx = arr.indexOf(key);
+    if (idx > -1) arr.splice(idx, 1); else arr.push(key);
+    state.answers[qId] = arr;
   }
   renderQuestion();
 }
-function nextQ() {
-  if(state.currentQIdx<totalQ()-1) { state.currentQIdx++; render(); card.scrollIntoView({behavior:'smooth',block:'start'}); }
-  else { state.screen='result'; render(); card.scrollIntoView({behavior:'smooth',block:'start'}); }
-}
-function prevQ() { if(state.currentQIdx>0){state.currentQIdx--; render(); card.scrollIntoView({behavior:'smooth',block:'start'});} }
-function restart() { state.screen='cover'; state.answers={}; state.currentQIdx=0; render(); card.scrollIntoView({behavior:'smooth',block:'start'}); }
 
-// reprise des templates de rendu (identiques à originaux mais couleurs brand déjà intégrées CSS)
+function nextQ() {
+  if (state.currentQIdx < totalQ() - 1) {
+    state.currentQIdx++;
+    render();
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    // Fin du quiz → écran de capture
+    state.screen = 'leadcapture';
+    render();
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function prevQ() {
+  if (state.currentQIdx > 0) {
+    state.currentQIdx--;
+    render();
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function skipLeadCapture() {
+  state.leadData = null;
+  state.screen = 'result';
+  render();
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function restart() {
+  state.screen = 'cover';
+  state.answers = {};
+  state.currentQIdx = 0;
+  state.leadData = null;
+  render();
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ══════════════════════════════════════════════════
+// RENDU — COVER
+// ══════════════════════════════════════════════════
 function renderCover() {
-  const v=VERSIONS[state.version];
-  card.innerHTML=`
+  card.innerHTML = `
     <div class="cover">
       <div class="cover-eyebrow">Outil de diagnostic Vanden Broele</div>
-      <h1 class="cover-title">Votre administration est-elle prête pour la<br><em>signature électronique </em>?</h1>
+      <h1 class="cover-title">Votre administration est-elle prête pour la<br><em>signature électronique</em>&nbsp;?</h1>
       <p class="cover-lead">Les administrations publiques wallonnes font face à des obligations croissantes en matière de conformité numérique. Ce diagnostic vous permet d'évaluer votre niveau de maturité, d'identifier vos risques et d'obtenir des recommandations concrètes et objectives.</p>
       <div class="version-selector">
         <div class="version-title">Choisissez le type de diagnostic</div>
-        <div class="version-cards">${Object.entries(VERSIONS).map(([k,v])=>`<div class="ver-card ${state.version===k?'active':''}" onclick="selectVersion('${k}')"><div class="ver-icon">${v.icon}</div><div class="ver-name">${v.name}</div><div class="ver-time">${v.time}</div><div class="ver-time" style="margin-top:4px;font-size:11px;">${v.description}</div></div>`).join('')}</div>
+        <div class="version-cards">
+          ${Object.entries(VERSIONS).map(([k,v]) => `
+            <div class="ver-card ${state.version===k?'active':''}" onclick="selectVersion('${k}')">
+              <div class="ver-icon">${v.icon}</div>
+              <div class="ver-name">${v.name}</div>
+              <div class="ver-time">${v.time}</div>
+              <div class="ver-time" style="margin-top:4px;font-size:11px;">${v.description}</div>
+            </div>`).join('')}
+        </div>
       </div>
-      <button class="btn btn-primary" style="font-size:15px;padding:14px 36px;" onclick="startQuiz()">Démarrer le diagnostic →</button>
-      <p class="cover-disclaimer">Aucune donnée personnelle n'est collectée. Les réponses sont personnelles et confidentielles.</p>
+      <button class="btn btn-primary" style="font-size:10px;padding:14px 36px;" onclick="startQuiz()">Démarrer le diagnostic →</button>
+      <p class="cover-disclaimer">Aucune donnée personnelle n'est collectée sans votre accord mais ces informations sont nécessaires pour obtenir les résultats</p>
     </div>`;
 }
+
+// ══════════════════════════════════════════════════
+// RENDU — QUESTION
+// ══════════════════════════════════════════════════
 function renderQuestion() {
-  const qId=currentQId(), q=QUESTIONS[qId], qList=getQList(), pct=Math.round(((state.currentQIdx)/(totalQ()))*100);
-  const answered=state.answers[qId]||[], mod=MODULES[q.mod], canNext=answered.length>0;
-  card.innerHTML=`
+  const qId = currentQId(), q = QUESTIONS[qId];
+  const pct = Math.round((state.currentQIdx / totalQ()) * 100);
+  const answered = state.answers[qId] || [];
+  const mod = MODULES[q.mod];
+  const canNext = answered.length > 0;
+
+  card.innerHTML = `
     <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
     <div class="module-label"><div class="module-dot" style="background:${mod.color}"></div>${mod.label} — ${mod.name}</div>
     <div class="q-body">
-      <div class="q-number">Question ${state.currentQIdx+1} / ${totalQ()}</div>
-      ${q.scenario?`<div class="scenario-box"><div class="scenario-label">📍 Scénario terrain</div><div class="scenario-text">${q.scenarioText}</div></div>`:''}
+      <div class="q-number">Question ${state.currentQIdx + 1} / ${totalQ()}</div>
+      ${q.scenario ? `<div class="scenario-box"><div class="scenario-label">📍 Scénario terrain</div><div class="scenario-text">${q.scenarioText}</div></div>` : ''}
       <h2 class="q-title">${q.title}</h2>
       <p class="q-subtitle">${q.subtitle}</p>
-      ${q.type==='multi'?'<div class="multi-hint">Plusieurs réponses possibles</div>':''}
-      <div class="options">${q.options.map((opt,i)=>{let isSelected=answered.includes(opt.key); return `<div class="option ${isSelected?'selected':''}" onclick="selectOption('${qId}','${opt.key}','${q.type}')"><div class="option-key">${opt.key.toUpperCase()}</div><div class="option-content"><div class="option-text">${opt.text}</div>${opt.sub?`<div class="option-sub">${opt.sub}</div>`:''}</div></div>`;}).join('')}</div>
-      ${q.tip?`<div class="info-tip">💡 ${q.tip}</div>`:''}
+      ${q.type === 'multi' ? '<div class="multi-hint">Plusieurs réponses possibles</div>' : ''}
+      <div class="options">
+        ${q.options.map(opt => {
+          const isSelected = answered.includes(opt.key);
+          return `<div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption('${qId}','${opt.key}','${q.type}')">
+            <div class="option-key">${opt.key.toUpperCase()}</div>
+            <div class="option-content">
+              <div class="option-text">${opt.text}</div>
+              ${opt.sub ? `<div class="option-sub">${opt.sub}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${q.tip ? `<div class="info-tip">💡 ${q.tip}</div>` : ''}
     </div>
     <div class="q-nav">
-      <button class="btn btn-secondary" onclick="prevQ()" ${state.currentQIdx===0?'disabled':''}>← Précédent</button>
-      <span class="step-counter">${state.currentQIdx+1} / ${totalQ()}</span>
-      <button class="btn btn-primary" onclick="nextQ()" ${!canNext?'disabled':''}>${state.currentQIdx===totalQ()-1?'Voir mon diagnostic':'Suivant →'}</button>
+      <button class="btn btn-secondary" onclick="prevQ()" ${state.currentQIdx === 0 ? 'disabled' : ''}>← Précédent</button>
+      <span class="step-counter">${state.currentQIdx + 1} / ${totalQ()}</span>
+      <button class="btn btn-primary" onclick="nextQ()" ${!canNext ? 'disabled' : ''}>
+        ${state.currentQIdx === totalQ() - 1 ? 'Voir mon diagnostic' : 'Suivant →'}
+      </button>
     </div>`;
-}
-function renderResult() {
-  const sc=computeScore(), level=getLevel(sc.pct), levels={red:{emoji:'🔴',label:'Conformité insuffisante – Risque élevé',cls:'level-red',title:'Votre administration est exposée à certains risques de conformité',subtitle:'Notre diagnostic révèle des lacunes importantes dans votre approche de la signature électronique. Des actions correctrices prioritaires s\'imposent pour vous conformer aux exigences légales et protéger votre administration.'},orange:{emoji:'🟠',label:'Maturité intermédiaire – Améliorations nécessaires',cls:'level-orange',title:'De bonnes bases, mais des angles morts à combler',subtitle:'Votre administration a pris conscience des enjeux et posé les premières briques. Des améliorations ciblées sur vos processus, votre gouvernance et votre formation vous permettront de franchir un pallier décisif.'},green:{emoji:'🟢',label:'Bonne conformité – Processus solides',cls:'level-green',title:'Votre administration montre une vraie culture de la conformité numérique',subtitle:'Vous avez intégré les bonnes pratiques de la signature électronique dans vos processus. Quelques points de vigilance subsistent pour maintenir et renforcer ce niveau d\'excellence opérationnelle.'}}[level];
-  const deg=Math.round((sc.pct/100)*360), scoreColor=level==='red'?'var(--red)':level==='orange'?'var(--orange)':'var(--green)';
-  const modUsed=[...new Set(getQList().map(id=>QUESTIONS[id].mod))];
-  function getRecos(level,sc){ let all={red:[{icon:'⚖️',text:'Il peut être utile de mettre en place une procédure interne sur les niveaux de signature',sub:'Par exemple, définissez par type de document quel niveau eIDAS s\'applique (simple / avancé / qualifié). Formalisez ce référentiel dans votre règlement intérieur.'},{icon:'🚨',text:'Auditer vos marchés publics récents pour identifier les risques de nullité',sub:'Les documents signés avec un outil non certifié eIDAS pour des marchés > 30.000€ HTVA peuvent être contestés. Un audit juridique préventif est recommandé.'},{icon:'👥',text:'Former en priorité les agents à risque : RH, marchés publics, secrétariat',sub:'Une session de 2h sur les bases de la signature électronique réduit considérablement les erreurs les plus coûteuses.'},{icon:'🔧',text:'Évaluer et déployer une solution certifiée eIDAS adaptée à vos usages',sub:'Priorisez une solution qui couvre vos besoins actuels (contrats, délibérations, marchés) avec une feuille de route claire vers la signature citoyenne.'}],orange:[{icon:'📋',text:'Formaliser votre politique de délégation de signature',sub:'Un cadre clair sur qui peut signer quoi, dans quelles conditions, protège l\'administration et fluidifie les processus.'},{icon:'🗄️',text:'Renforcer votre archivage et la production automatique de journaux de preuve',sub:'En cas de contentieux, le journal de preuve horodaté est votre première ligne de défense. Vérifiez que votre outil le génère automatiquement.'},{icon:'🔄',text:'Automatiser les workflows de validation documentaire récurrents',sub:'Contrats RH, délibérations, marchés : ces flux prévisibles gagnent à être automatisés pour réduire les délais et les risques d\'erreur.'},{icon:'📱',text:'Évaluer l\'ouverture de la signature aux citoyens et aux élus',sub:'La signature à distance via itsme® est une attente croissante des citoyens et permet de moderniser l\'image de votre administration.'}],green:[{icon:'🏆',text:'Documenter et partager vos bonnes pratiques en interne',sub:'Votre niveau de maturité est au-dessus de la moyenne. Capitalisez sur ces acquis en formalisant vos procédures comme référence interne.'},{icon:'🔍',text:'Réaliser un audit annuel de conformité eIDAS',sub:'La réglementation évolue. Un audit annuel garantit que vos pratiques restent alignées avec le cadre légal européen et belge.'},{icon:'🚀',text:'Envisager l\'extension de la signature électronique aux processus citoyens',sub:'Si ce n\'est pas encore le cas, la signature citoyenne à distance est la prochaine étape naturelle de votre transformation numérique.'},{icon:'🤝',text:'Partager votre expérience avec d\'autres administrations de votre réseau',sub:'Les administrations wallonnes progressent plus vite en partageant leurs retours d\'expérience. Par exemple : Les forums Vanden Broele, les Fédérations régionales & provinciales (DF/DG/RR communes et CPAS), les groupements de communes, ...'}]}[level]; return all;}
-  const recos=getRecos(level,sc);
-  card.innerHTML=`
-    <div class="result">
-      <div class="result-header"><div class="result-level ${levels.cls}">${levels.emoji} ${levels.label}</div><h2 class="result-title">${levels.title}</h2><p class="result-subtitle">${levels.subtitle}</p><div class="score-ring-wrap"><div class="score-ring" style="--score-pct:${deg}deg;--score-color:${scoreColor};"><div class="score-value"><div class="score-num">${sc.pct}%</div><div class="score-max">de conformité</div></div></div></div></div>
-      <div class="modules-grid">${modUsed.map(m=>{let ms=sc.modScores[m], mpct=ms.m>0?Math.round((ms.s/ms.m)*100):0, mcolor=mpct<40?'var(--red)':mpct<70?'var(--orange)':'var(--green)'; return `<div class="mod-result"><div class="mod-result-label">${MODULES[m].label}</div><div class="mod-result-name">${MODULES[m].name}</div><div class="mod-bar"><div class="mod-bar-fill" style="width:${mpct}%;background:${mcolor};"></div></div><div class="mod-score-text">${mpct}% · ${ms.s}/${ms.m} pts</div></div>`;}).join('')}</div>
-      <div class="reco-section"><h3 class="reco-title">Recommandations prioritaires</h3><div class="reco-list">${recos.map(r=>`<div class="reco-item"><div class="reco-icon">${r.icon}</div><div class="reco-content"><div class="reco-text">${r.text}</div><div class="reco-sub">${r.sub}</div></div></div>`).join('')}</div></div>
-      <div class="cta-block"><div class="cta-eyebrow">Solution proposée</div><h3 class="cta-title">eSignFlow — La signature électronique pensée pour les administrations belges</h3><p class="cta-text">Conçue spécifiquement pour les communes belges, les CPAS et les intercommunales, <b>eSignFlow</b> répond aux exigences terrain que ce diagnostic a mis en lumière. Simple d'usage pour les agents, conforme pour les juristes, sécurisée pour l'IT.</p><div class="cta-features"><div class="cta-feat"><span class="cta-feat-check">✓</span> Conformité eIDAS & droit belge — niveaux simple, avancé et qualifié</div><div class="cta-feat"><span class="cta-feat-check">✓</span> Intégration itsme® & eID pour les citoyens et les agents</div><div class="cta-feat"><span class="cta-feat-check">✓</span> Workflows internes, délégation de signature, signature en masse</div><div class="cta-feat"><span class="cta-feat-check">✓</span> Journal de preuve automatique & archivage conforme AGR</div><div class="cta-feat"><span class="cta-feat-check">✓</span> Hébergement RGPD en Belgique — aucune donnée hors UE</div></div><div class="cta-actions"><a href="https://www.esignflow.be/fr-be/" target="_blank" class="btn-gold">En savoir plus →</a></div>
-      <div class="demo-section">
-        <div class="demo-label">📅 Demander une démonstration — Contactez votre commercial</div>
-        <div class="commercial-cards">
-          <div class="commercial-card">
-            <div class="commercial-info">
-              <img class="commercial-photo" src="https://media.licdn.com/dms/image/v2/C5603AQHtbu4RKZjkqA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1517496169498?e=1775088000&v=beta&t=EnOJJJW0XEnruNIjcJJ3cmw-NnhN_5brxG_6cXnLITo" alt="Lisa D'Angelo" onerror="this.style.display='none'">
-              <div>
-                <div class="commercial-name">Lisa D'Angelo</div>
-                <div class="commercial-title">Account manager</div>
-              </div>
-            </div>
-            <div class="commercial-territory">Provinces de Liège, Luxembourg &amp; Namur</div>
-            <a href="mailto:lisa.dangelo@vandenbroele.be" class="btn-demo-contact">Contacter Lisa →</a>
-          </div>
-          <div class="commercial-card">
-            <div class="commercial-info">
-              <img class="commercial-photo" src="https://media.licdn.com/dms/image/v2/D4E03AQHaBmlyg5HbAg/profile-displayphoto-crop_800_800/B4EZxHcTZAKoAM-/0/1770725131065?e=1775088000&v=beta&t=HF4UZP9cM2k4TFlkjZN_xUAGgRjlaXeDesiD1bRGZik" alt="Jérome Sulbout" onerror="this.style.display='none'">
-              <div>
-                <div class="commercial-name">Jérome Sulbout</div>
-                <div class="commercial-title">Account manager</div>
-              </div>
-            </div>
-            <div class="commercial-territory">Hainaut, Namur, Brabant Wallon &amp; Bruxelles</div>
-            <a href="mailto:jerome.sulbout@vandenbroele.be" class="btn-demo-contact">Contacter Jérome →</a>
-          </div>
-        </div>
-      </div></div>
-      <div class="result-restart"><button class="btn-text" onclick="restart()">↩ Recommencer avec une autre version</button></div>
-    </div>`;
-  setTimeout(()=>{document.querySelectorAll('.mod-bar-fill').forEach(el=>{let w=el.style.width; el.style.width='0'; setTimeout(()=>el.style.width=w,50);});},100);
 }
 
-// initialisation
-window.selectVersion=selectVersion; window.startQuiz=startQuiz; window.selectOption=selectOption; window.nextQ=nextQ; window.prevQ=prevQ; window.restart=restart;
+// ══════════════════════════════════════════════════
+// RENDU — LEAD CAPTURE (écran interstitiel)
+// ══════════════════════════════════════════════════
+function renderLeadCapture() {
+  const d = state.leadData || {};
+  card.innerHTML = `
+    <div class="lead-capture">
+      <div class="lc-progress-hint">
+        <span class="lc-progress-step done">✓ Quiz terminé</span>
+        <span class="lc-progress-arrow">→</span>
+        <span class="lc-progress-step active">Vos coordonnées</span>
+        <span class="lc-progress-arrow">→</span>
+        <span class="lc-progress-step next">Résultats détaillés</span>
+      </div>
+      <div class="lc-header">
+        <div class="lc-eyebrow">Accéder à mon rapport</div>
+        <h2 class="lc-title">Votre diagnostic est prêt !</h2>
+        <p class="lc-subtitle">
+          Renseignez vos coordonnées pour accéder à vos résultats complets et télécharger votre rapport PDF.
+          Ces informations nous permettent de mieux comprendre les besoins des administrations belges.
+        </p>
+      </div>
+      <div class="lc-form-grid">
+        <div class="lc-field span2">
+          <label>Nom complet <span style="color:var(--brand)">*</span></label>
+          <input type="text" id="lc_nom_complet" placeholder="Marie Dupont" value="${d.nomComplet||''}" autocomplete="name" />
+        </div>
+        <div class="lc-field">
+          <label>Commune / Administration <span style="color:var(--brand)">*</span></label>
+          <input type="text" id="lc_commune" placeholder="Ex. Commune de Wavre" value="${d.commune||''}" />
+        </div>
+        <div class="lc-field">
+          <label>Fonction</label>
+          <select id="lc_fonction">
+            <option value="">— Sélectionnez —</option>
+            ${[
+              'Agent administratif',  
+              'Chef de service / Directeur de département',  
+              'Directeur financier / Receveur',  
+              'Directeur général / Secrétaire communal',
+              'Juriste',
+              'Mandataire',
+              'Responsable informatique / DSI',
+              'Responsable marchés publics',
+              'Responsable RH',
+              'Autre',
+            ].map(f => `<option value="${f}" ${d.fonction===f?'selected':''}>${f}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="lc-consents">
+        <div class="lc-consent">
+          <input type="checkbox" id="lc_consent_data" ${d.consentData?'checked':''} />
+          <label for="lc_consent_data">
+            J'accepte que Vanden Broele enregistre mes coordonnées afin de me transmettre ce rapport de diagnostic.
+            <span class="lc-consent-required">Obligatoire</span>
+          </label>
+        </div>
+        <div class="lc-consent">
+          <input type="checkbox" id="lc_consent_contact" ${d.consentContact?'checked':''} />
+          <label for="lc_consent_contact">
+            J'accepte d'être contacté(e) par un conseiller eSignFlow pour discuter de mes résultats.
+            <span class="lc-consent-opt">(facultatif)</span>
+          </label>
+        </div>
+        <div class="lc-consent">
+          <input type="checkbox" id="lc_consent_newsletter" ${d.consentNewsletter?'checked':''} />
+          <label for="lc_consent_newsletter">
+            Je souhaite recevoir la newsletter eSignFlow — actualités, conseils et nouveautés pour les pouvoirs locaux.
+            <span class="lc-consent-opt">(facultatif)</span>
+          </label>
+        </div>
+      </div>
+      <div class="lc-actions">
+        <button class="btn-lc-submit" id="lc_submit_btn" onclick="submitLeadCapture()">
+          Accéder à mon rapport →
+        </button>
+
+      </div>
+      <div class="lc-error" id="lc_error"></div>
+      <div class="lc-sending" id="lc_sending" style="display:none;">
+        <div class="lc-sending-spinner"></div>
+        <div style="font-size:13px;color:var(--text-muted);font-family:'Montserrat',sans-serif;">Enregistrement…</div>
+      </div>
+      <div class="lc-rgpd-clause">
+        En soumettant ce formulaire, vos données sont traitées par Vanden Broele SA conformément au RGPD (Règlement UE 2016/679).
+        Hébergement en Belgique. Aucune transmission à des tiers.
+        Droit d'accès, de rectification et de suppression :
+        <a href="mailto:dpo@vandenbroele.be">dpo@vandenbroele.be</a> ·
+        <a href="${CONFIG.PRIVACY_URL}" target="_blank">Politique de confidentialité</a>
+      </div>
+    </div>`;
+}
+
+
+async function submitLeadCapture() {
+  const nomComplet = document.getElementById('lc_nom_complet').value.trim();
+  const commune    = document.getElementById('lc_commune').value.trim();
+  const fonction = document.getElementById('lc_fonction').value;
+  const consentData       = document.getElementById('lc_consent_data').checked;
+  const consentContact    = document.getElementById('lc_consent_contact').checked;
+  const consentNewsletter = document.getElementById('lc_consent_newsletter').checked;
+
+  const errorEl   = document.getElementById('lc_error');
+  const sendingEl = document.getElementById('lc_sending');
+  const submitBtn = document.getElementById('lc_submit_btn');
+
+  // Validation
+  if (!nomComplet || !commune) {
+    errorEl.textContent = 'Veuillez renseigner votre nom complet et votre commune.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (!consentData) {
+    errorEl.textContent = 'Veuillez cocher la première case pour enregistrer vos données et accéder au rapport.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+
+  // Sauvegarde dans le state
+  state.leadData = { nomComplet, commune, fonction, consentData, consentContact, consentNewsletter };
+
+  // Envoi vers Power Automate (non-bloquant)
+  if (CONFIG.POWER_AUTOMATE_URL) {
+    submitBtn.disabled = true;
+    sendingEl.style.display = 'block';
+    const sc = computeScore();
+    try {
+      await fetch(CONFIG.POWER_AUTOMATE_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Power Automate ne renvoie pas de header CORS — comportement normal
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp:        new Date().toISOString(),
+          nomComplet, commune, fonction,
+          version:          VERSIONS[state.version].name,
+          scorePct:         sc.pct,
+          niveau:           getLevel(sc.pct),
+          url:              window.location.href,
+          consentContact:   consentContact    ? 'oui' : 'non',
+          consentNewsletter: consentNewsletter ? 'oui' : 'non',
+        }),
+      });
+    } catch(e) {
+      // Silencieux — on ne bloque jamais l'accès aux résultats pour une erreur réseau
+      console.warn('[eSignFlow] Envoi Power Automate échoué :', e.message);
+    }
+    sendingEl.style.display = 'none';
+    submitBtn.disabled = false;
+  } else {
+    // Mode dev — log dans la console
+    const sc = computeScore();
+    console.log('[eSignFlow Lead]', { nomComplet, commune, fonction, version: state.version, scorePct: sc.pct, niveau: getLevel(sc.pct) });
+  }
+
+  state.screen = 'result';
+  render();
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+
+// ══════════════════════════════════════════════════
+// RENDU — RESULT
+// ══════════════════════════════════════════════════
+function renderResult() {
+  const sc = computeScore(), level = getLevel(sc.pct);
+  const levels = {
+    red:    { emoji:'🔴', label:'Conformité insuffisante – Risque élevé',        cls:'level-red',    title:'Votre administration est exposée à certains risques de conformité',      subtitle:'Notre diagnostic révèle des lacunes importantes dans votre approche de la signature électronique. Des actions correctrices prioritaires s\'imposent pour vous conformer aux exigences légales et protéger votre administration.' },
+    orange: { emoji:'🟠', label:'Maturité intermédiaire – Améliorations nécessaires', cls:'level-orange', title:'De bonnes bases, mais des angles morts à combler',                       subtitle:'Votre administration a pris conscience des enjeux et posé les premières briques. Des améliorations ciblées sur vos processus, votre gouvernance et votre formation vous permettront de franchir un pallier décisif.' },
+    green:  { emoji:'🟢', label:'Bonne conformité – Processus solides',           cls:'level-green',  title:'Votre administration montre une vraie culture de la conformité numérique', subtitle:'Vous avez intégré les bonnes pratiques de la signature électronique dans vos processus. Quelques points de vigilance subsistent pour maintenir et renforcer ce niveau d\'excellence opérationnelle.' },
+  }[level];
+
+  const deg = Math.round((sc.pct / 100) * 360);
+  const scoreColor = level==='red' ? 'var(--red)' : level==='orange' ? 'var(--orange)' : 'var(--green)';
+  const modUsed = [...new Set(getQList().map(id => QUESTIONS[id].mod))];
+
+  function getRecos(level) {
+    return {
+      red: [
+        { icon:'⚖️', text:'Il peut être utile de mettre en place une procédure interne sur les niveaux de signature',        sub:'Par exemple, définissez par type de document quel niveau eIDAS s\'applique (simple / avancé / qualifié). Formalisez ce référentiel dans votre règlement intérieur.' },
+        { icon:'🚨', text:'Auditer vos marchés publics récents pour identifier les risques de nullité',                        sub:'Les documents signés avec un outil non certifié eIDAS pour des marchés > 30.000€ HTVA peuvent être contestés. Un audit juridique préventif est recommandé.' },
+        { icon:'👥', text:'Former en priorité les agents à risque : RH, marchés publics, secrétariat',                         sub:'Une session de 2h sur les bases de la signature électronique réduit considérablement les erreurs les plus coûteuses.' },
+        { icon:'🔧', text:'Évaluer et déployer une solution certifiée eIDAS adaptée à vos usages',                            sub:'Priorisez une solution qui couvre vos besoins actuels (contrats, délibérations, marchés) avec une feuille de route claire vers la signature citoyenne.' },
+      ],
+      orange: [
+        { icon:'📋', text:'Formaliser votre politique de délégation de signature',                                             sub:'Un cadre clair sur qui peut signer quoi, dans quelles conditions, protège l\'administration et fluidifie les processus.' },
+        { icon:'🗄️', text:'Renforcer votre archivage et la production automatique de journaux de preuve',                    sub:'En cas de contentieux, le journal de preuve horodaté est votre première ligne de défense. Vérifiez que votre outil le génère automatiquement.' },
+        { icon:'🔄', text:'Automatiser les workflows de validation documentaire récurrents',                                    sub:'Contrats RH, délibérations, marchés : ces flux prévisibles gagnent à être automatisés pour réduire les délais et les risques d\'erreur.' },
+        { icon:'📱', text:'Évaluer l\'ouverture de la signature aux citoyens et aux élus',                                     sub:'La signature à distance via itsme® est une attente croissante des citoyens et permet de moderniser l\'image de votre administration.' },
+      ],
+      green: [
+        { icon:'🏆', text:'Documenter et partager vos bonnes pratiques en interne',                                            sub:'Votre niveau de maturité est au-dessus de la moyenne. Capitalisez sur ces acquis en formalisant vos procédures comme référence interne.' },
+        { icon:'🔍', text:'Réaliser un audit annuel de conformité eIDAS',                                                     sub:'La réglementation évolue. Un audit annuel garantit que vos pratiques restent alignées avec le cadre légal européen et belge.' },
+        { icon:'🚀', text:'Envisager l\'extension de la signature électronique aux processus citoyens',                       sub:'Si ce n\'est pas encore le cas, la signature citoyenne à distance est la prochaine étape naturelle de votre transformation numérique.' },
+        { icon:'🤝', text:'Partager votre expérience avec d\'autres administrations de votre réseau',                         sub:'Les administrations wallonnes progressent plus vite en partageant leurs retours d\'expérience. Par exemple : Les forums Vanden Broele, les Fédérations régionales & provinciales (DF/DG/RR communes et CPAS), les groupements de communes, ...' },
+      ],
+    }[level];
+  }
+
+  const recos = getRecos(level);
+
+
+  card.innerHTML = `
+    <div class="result">
+      <div class="result-header">
+        <div class="result-level ${levels.cls}">${levels.emoji} ${levels.label}</div>
+        <h2 class="result-title">${levels.title}</h2>
+        <p class="result-subtitle">${levels.subtitle}</p>
+        <div class="score-ring-wrap">
+          <div class="score-ring" style="--score-pct:${deg}deg;--score-color:${scoreColor};">
+            <div class="score-value">
+              <div class="score-num">${sc.pct}%</div>
+              <div class="score-max">de conformité</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modules-grid">
+        ${modUsed.map(m => {
+          const ms = sc.modScores[m];
+          const mpct = ms.m > 0 ? Math.round((ms.s / ms.m) * 100) : 0;
+          const mcolor = mpct < 40 ? 'var(--red)' : mpct < 70 ? 'var(--orange)' : 'var(--green)';
+          return `<div class="mod-result">
+            <div class="mod-result-label">${MODULES[m].label}</div>
+            <div class="mod-result-name">${MODULES[m].name}</div>
+            <div class="mod-bar"><div class="mod-bar-fill" style="width:${mpct}%;background:${mcolor};"></div></div>
+            <div class="mod-score-text">${mpct}% · ${ms.s}/${ms.m} pts</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="reco-section">
+        <h3 class="reco-title">Recommandations prioritaires</h3>
+        <div class="reco-list">
+          ${recos.map(r => `
+            <div class="reco-item">
+              <div class="reco-icon">${r.icon}</div>
+              <div class="reco-content">
+                <div class="reco-text">${r.text}</div>
+                <div class="reco-sub">${r.sub}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="cta-block">
+        <div class="cta-eyebrow">Solution proposée</div>
+        <h3 class="cta-title">eSignFlow — La signature électronique pensée pour les administrations belges</h3>
+        <p class="cta-text">Conçue spécifiquement pour les communes belges, les CPAS et les intercommunales, <b>eSignFlow</b> répond aux exigences terrain que ce diagnostic a mis en lumière. Simple d'usage pour les agents, conforme pour les juristes, sécurisée pour l'IT.</p>
+        <div class="cta-features">
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Conformité eIDAS & droit belge — niveaux simple, avancé et qualifié</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Intégration itsme® & eID pour les citoyens et les agents</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Workflows internes, délégation de signature, signature en masse</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Journal de preuve automatique & archivage conforme AGR</div>
+          <div class="cta-feat"><span class="cta-feat-check">✓</span> Hébergement RGPD en Belgique — aucune donnée hors UE</div>
+        </div>
+        <div class="cta-actions">
+          <a href="https://www.esignflow.be/fr-be/" target="_blank" class="btn-gold">En savoir plus →</a>
+          <button class="btn-pdf" id="btn-pdf-download" onclick="downloadPDF()">
+            ⬇ Télécharger mon rapport PDF
+          </button>
+        </div>
+
+        <div class="demo-section">
+          <div class="demo-label">📅 Demander une démonstration — Contactez votre commercial</div>
+          <div class="commercial-cards">
+            <div class="commercial-card">
+              <div class="commercial-info">
+                <img class="commercial-photo" src="https://media.licdn.com/dms/image/v2/C5603AQHtbu4RKZjkqA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1517496169498?e=1775088000&v=beta&t=EnOJJJW0XEnruNIjcJJ3cmw-NnhN_5brxG_6cXnLITo" alt="Lisa D'Angelo" onerror="this.style.display='none'">
+                <div>
+                  <div class="commercial-name">Lisa D'Angelo</div>
+                  <div class="commercial-title">Account manager</div>
+                </div>
+              </div>
+              <div class="commercial-territory">Provinces de Liège, Luxembourg &amp; Namur</div>
+              <a href="mailto:lisa.dangelo@vandenbroele.be" class="btn-demo-contact">Contacter Lisa →</a>
+            </div>
+            <div class="commercial-card">
+              <div class="commercial-info">
+                <img class="commercial-photo" src="https://media.licdn.com/dms/image/v2/D4E03AQHaBmlyg5HbAg/profile-displayphoto-crop_800_800/B4EZxHcTZAKoAM-/0/1770725131065?e=1775088000&v=beta&t=HF4UZP9cM2k4TFlkjZN_xUAGgRjlaXeDesiD1bRGZik" alt="Jérome Sulbout" onerror="this.style.display='none'">
+                <div>
+                  <div class="commercial-name">Jérome Sulbout</div>
+                  <div class="commercial-title">Account manager</div>
+                </div>
+              </div>
+              <div class="commercial-territory">Hainaut, Namur, Brabant Wallon &amp; Bruxelles</div>
+              <a href="mailto:jerome.sulbout@vandenbroele.be" class="btn-demo-contact">Contacter Jérome →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-restart">
+        <button class="btn-text" onclick="restart()">↩ Recommencer avec une autre version</button>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    document.querySelectorAll('.mod-bar-fill').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0';
+      setTimeout(() => el.style.width = w, 50);
+    });
+  }, 100);
+}
+
+// ══════════════════════════════════════════════════
+// GÉNÉRATION PDF — sans window.print(), compatible iFrame cross-origin
+// ══════════════════════════════════════════════════
+function downloadPDF() {
+  const btn = document.getElementById('btn-pdf-download');
+  if (btn) { btn.disabled = true; btn.textContent = 'Génération en cours…'; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const sc    = computeScore();
+  const level = getLevel(sc.pct);
+  const levelLabels = { red: 'Conformité insuffisante – Risque élevé', orange: 'Maturité intermédiaire – Améliorations nécessaires', green: 'Bonne conformité – Processus solides' };
+  const levelColors = { red: [220,38,38], orange: [234,88,12], green: [22,163,74] };
+  const modUsed = [...new Set(getQList().map(id => QUESTIONS[id].mod))];
+  const contact = state.leadData;
+
+  const W = 210, M = 18; // largeur A4, marge
+  let y = 0;
+
+  // Fonctions utilitaires
+  const setFont = (style, size, color) => {
+    doc.setFont('helvetica', style);
+    doc.setFontSize(size);
+    doc.setTextColor(...(color || [26,26,46]));
+  };
+  const line = (x1, y1, x2, y2, color, lw) => {
+    doc.setDrawColor(...(color || [220,215,205]));
+    doc.setLineWidth(lw || 0.3);
+    doc.line(x1, y1, x2, y2);
+  };
+  const box = (x, bY, w, h, fill, stroke) => {
+    if (fill)   { doc.setFillColor(...fill);   }
+    if (stroke) { doc.setDrawColor(...stroke); doc.setLineWidth(0.3); }
+    doc.roundedRect(x, bY, w, h, 3, 3, fill && stroke ? 'FD' : fill ? 'F' : 'D');
+  };
+  const wrap = (text, x, wY, maxW) => {
+    const lines = doc.splitTextToSize(text, maxW);
+    doc.text(lines, x, wY);
+    return lines.length;
+  };
+
+  // ── En-tête ──
+  box(0, 0, W, 42, [13,31,60]);
+  // Bande accent
+  doc.setFillColor(70,128,247);
+  doc.rect(0, 40, W, 2, 'F');
+  // Logo texte
+  setFont('bold', 18, [255,255,255]);
+  doc.text('eSignFlow', M, 16);
+  setFont('normal', 9, [107,154,255]);
+  doc.text('Diagnostic Signature Électronique', M, 23);
+  setFont('normal', 8, [180,200,240]);
+  doc.text('Vanden Broele · ' + new Date().toLocaleDateString('fr-BE', { day:'2-digit', month:'long', year:'numeric' }), M, 30);
+  // Score badge (coin droit)
+  const scoreCol = levelColors[level];
+  doc.setFillColor(255,255,255);
+  doc.circle(W - M - 8, 20, 14, 'F');
+  setFont('bold', 18, scoreCol);
+  doc.text(sc.pct + '%', W - M - 8, 18, { align: 'center' });
+  setFont('normal', 7, scoreCol);
+  doc.text('conformité', W - M - 8, 24, { align: 'center' });
+
+  y = 52;
+
+  // ── Contact (si disponible) ──
+  if (contact && contact.nomComplet) {
+    setFont('bold', 9, [90,99,122]);
+    doc.text('RAPPORT ÉTABLI POUR', M, y);
+    y += 5;
+    setFont('bold', 12, [13,31,60]);
+    doc.text(contact.nomComplet, M, y);
+    y += 5;
+    setFont('normal', 9, [90,99,122]);
+    if (contact.fonction)      doc.text(contact.fonction, M, y), y += 4.5;
+    if (contact.administration) doc.text(contact.administration, M, y), y += 4.5;
+    if (contact.typeOrganisme)  doc.text(contact.typeOrganisme, M, y), y += 4.5;
+    line(M, y + 1, W - M, y + 1);
+    y += 7;
+  }
+
+  // ── Niveau global ──
+  box(M, y, W - 2*M, 18, [...levelColors[level].map(c => Math.min(255, c + 210))]);
+  doc.setFillColor(...levelColors[level]);
+  doc.roundedRect(M, y, 4, 18, 1, 1, 'F');
+  setFont('bold', 10, levelColors[level]);
+  doc.text(levelLabels[level], M + 8, y + 7);
+  setFont('normal', 8, [60,60,80]);
+  const versionName = VERSIONS[state.version].name;
+  doc.text(`Version ${versionName} · ${totalQ()} questions · Score ${sc.total}/${sc.maxTotal} pts`, M + 8, y + 13);
+  y += 26;
+
+  // ── Scores par module ──
+  setFont('bold', 10, [13,31,60]);
+  doc.text('RÉSULTATS PAR MODULE', M, y);
+  line(M, y + 2, W - M, y + 2, [70,128,247], 0.5);
+  y += 8;
+
+  const colW = (W - 2*M - 6) / 2;
+  let col = 0;
+  modUsed.forEach(m => {
+    const ms  = sc.modScores[m];
+    const pct = ms.m > 0 ? Math.round((ms.s / ms.m) * 100) : 0;
+    const col2 = levelColors[pct < 40 ? 'red' : pct < 70 ? 'orange' : 'green'];
+    const xOff = M + col * (colW + 6);
+
+    box(xOff, y, colW, 22, [250,249,246], [220,215,205]);
+    setFont('bold', 7, [90,99,122]);
+    doc.text(MODULES[m].label.toUpperCase(), xOff + 4, y + 6);
+    setFont('bold', 8, [13,31,60]);
+    doc.text(MODULES[m].name, xOff + 4, y + 11);
+    // Barre de progression
+    const barX = xOff + 4, barY = y + 15, barW = colW - 8, barH = 3;
+    box(barX, barY, barW, barH, [220,215,205]);
+    if (pct > 0) box(barX, barY, barW * pct / 100, barH, col2);
+    setFont('normal', 7, col2);
+    doc.text(`${pct}% · ${ms.s}/${ms.m} pts`, xOff + colW - 4, y + 18, { align: 'right' });
+
+    col++;
+    if (col === 2) { col = 0; y += 26; }
+  });
+  if (col === 1) y += 26;
+  y += 6;
+
+  // ── Recommandations ──
+  // (Même logique que getRecos dans renderResult)
+  const recoSets = {
+    red: [
+      { icon:'⚖', text:'Mettre en place une procédure interne sur les niveaux de signature', sub:'Définissez par type de document quel niveau eIDAS s\'applique. Formalisez ce référentiel dans votre règlement intérieur.' },
+      { icon:'!',  text:'Auditer vos marchés publics récents pour identifier les risques de nullité', sub:'Les documents signés sans outil certifié eIDAS pour des marchés > 30.000€ HTVA peuvent être contestés.' },
+      { icon:'👥', text:'Former en priorité les agents à risque : RH, marchés publics, secrétariat', sub:'Une session de 2h réduit considérablement les erreurs les plus coûteuses.' },
+      { icon:'⚙', text:'Évaluer et déployer une solution certifiée eIDAS adaptée à vos usages', sub:'Priorisez une solution couvrant vos besoins actuels avec une feuille de route claire.' },
+    ],
+    orange: [
+      { icon:'📋', text:'Formaliser votre politique de délégation de signature', sub:'Un cadre clair sur qui peut signer quoi protège l\'administration et fluidifie les processus.' },
+      { icon:'🗄', text:'Renforcer votre archivage et les journaux de preuve automatiques', sub:'Le journal de preuve horodaté est votre première ligne de défense en cas de contentieux.' },
+      { icon:'🔄', text:'Automatiser les workflows de validation documentaire récurrents', sub:'Contrats RH, délibérations, marchés : ces flux gagnent à être automatisés.' },
+      { icon:'📱', text:'Évaluer l\'ouverture de la signature aux citoyens et aux élus', sub:'La signature via itsme® modernise l\'image de votre administration.' },
+    ],
+    green: [
+      { icon:'🏆', text:'Documenter et partager vos bonnes pratiques en interne', sub:'Votre niveau est au-dessus de la moyenne. Formalisez vos procédures comme référence.' },
+      { icon:'🔍', text:'Réaliser un audit annuel de conformité eIDAS', sub:'La réglementation évolue. Un audit annuel garantit l\'alignement avec le cadre légal.' },
+      { icon:'🚀', text:'Étendre la signature électronique aux processus citoyens', sub:'La signature citoyenne à distance est la prochaine étape naturelle.' },
+      { icon:'🤝', text:'Partager votre expérience avec d\'autres administrations', sub:'Les forums Vanden Broele et les fédérations régionales sont d\'excellents vecteurs.' },
+    ],
+  };
+  const recos = recoSets[level];
+
+  // Vérif saut de page
+  if (y > 220) { doc.addPage(); y = 18; }
+
+  setFont('bold', 10, [13,31,60]);
+  doc.text('RECOMMANDATIONS PRIORITAIRES', M, y);
+  line(M, y + 2, W - M, y + 2, [70,128,247], 0.5);
+  y += 9;
+
+  recos.forEach((r, i) => {
+    if (y > 255) { doc.addPage(); y = 18; }
+    // Numéro
+    doc.setFillColor(70,128,247);
+    doc.circle(M + 3, y + 1, 3.5, 'F');
+    setFont('bold', 8, [255,255,255]);
+    doc.text(String(i + 1), M + 3, y + 2.5, { align:'center' });
+    // Texte
+    setFont('bold', 9, [13,31,60]);
+    const nL = wrap(r.text, M + 10, y + 2, W - M - 24);
+    setFont('normal', 8, [90,99,122]);
+    const subLines = doc.splitTextToSize(r.sub, W - M - 24);
+    doc.text(subLines, M + 10, y + 2 + nL * 4.2);
+    y += 6 + nL * 4.2 + subLines.length * 3.8 + 3;
+    line(M + 10, y - 1.5, W - M, y - 1.5, [220,215,205], 0.2);
+  });
+
+  y += 6;
+
+  // ── Bloc CTA eSignFlow ──
+  if (y > 240) { doc.addPage(); y = 18; }
+  box(M, y, W - 2*M, 38, [13,31,60]);
+  doc.setFillColor(70,128,247);
+  doc.rect(M, y, 4, 38, 'F');
+  setFont('bold', 11, [255,255,255]);
+  doc.text('eSignFlow par Vanden Broele', M + 8, y + 9);
+  setFont('normal', 8, [180,200,240]);
+  const ctaLines = doc.splitTextToSize('Solution de signature électronique conçue pour les communes belges, CPAS et intercommunales. Conforme eIDAS, intégration itsme® & eID, hébergement RGPD en Belgique.', W - 2*M - 14);
+  doc.text(ctaLines, M + 8, y + 16);
+  setFont('bold', 9, [107,154,255]);
+  doc.text('www.esignflow.be', M + 8, y + 32);
+
+  // ── Pied de page ──
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    line(M, 284, W - M, 284, [200,195,185], 0.3);
+    setFont('normal', 7, [150,155,165]);
+    doc.text('Diagnostic eSignFlow · Vanden Broele · Outil non contractuel · Conforme RGPD', M, 289);
+    doc.text(`Page ${p} / ${totalPages}`, W - M, 289, { align: 'right' });
+  }
+
+  // Téléchargement
+  const dateStr = new Date().toISOString().slice(0,10);
+  const orgSlug = (contact && contact.administration)
+    ? contact.administration.replace(/\s+/g,'-').toLowerCase().slice(0,30) + '_'
+    : '';
+  doc.save(`rapport-esignflow_${orgSlug}${dateStr}.pdf`);
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '⬇ Télécharger mon rapport PDF'; }
+}
+
+// ══════════════════════════════════════════════════
+// EXPOSITION GLOBALE & INIT
+// ══════════════════════════════════════════════════
+window.selectVersion    = selectVersion;
+window.startQuiz        = startQuiz;
+window.selectOption     = selectOption;
+window.nextQ            = nextQ;
+window.prevQ            = prevQ;
+window.restart          = restart;
+window.skipLeadCapture   = skipLeadCapture;
+window.submitLeadCapture  = submitLeadCapture;
+window.downloadPDF      = downloadPDF;
+
 render();
 </script>
 </body>
